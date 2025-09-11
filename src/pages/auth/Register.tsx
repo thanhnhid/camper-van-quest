@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserPlus, User, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [customerData, setCustomerData] = useState({
     firstName: "",
     lastName: "",
@@ -30,7 +32,7 @@ const Register = () => {
     acceptTerms: false
   });
 
-  const handleCustomerRegister = () => {
+  const handleCustomerRegister = async () => {
     if (!customerData.firstName || !customerData.lastName || !customerData.email || !customerData.password) {
       toast({
         title: "Fehler",
@@ -58,13 +60,45 @@ const Register = () => {
       return;
     }
 
-    toast({
-      title: "Registrierung erfolgreich",
-      description: "Ihr Kundenkonto wurde erfolgreich erstellt!"
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: customerData.email,
+        password: customerData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            first_name: customerData.firstName,
+            last_name: customerData.lastName,
+            role: 'customer'
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Registrierung fehlgeschlagen",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Ihr Kundenkonto wurde erfolgreich erstellt! Bitte überprüfen Sie Ihre E-Mails."
+      });
+      
+      navigate('/dashboard/customer');
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Ein unerwarteter Fehler ist aufgetreten.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleProviderRegister = () => {
+  const handleProviderRegister = async () => {
     if (!providerData.companyName || !providerData.contactPerson || !providerData.email || !providerData.password) {
       toast({
         title: "Fehler",
@@ -92,10 +126,42 @@ const Register = () => {
       return;
     }
 
-    toast({
-      title: "Registrierung erfolgreich",
-      description: "Ihr Anbieter-Konto wurde erfolgreich erstellt! Wir werden Ihre Daten prüfen und uns bei Ihnen melden."
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: providerData.email,
+        password: providerData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            first_name: providerData.companyName,
+            last_name: providerData.contactPerson,
+            role: 'provider'
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Registrierung fehlgeschlagen",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Ihr Anbieter-Konto wurde erfolgreich erstellt! Bitte überprüfen Sie Ihre E-Mails."
+      });
+      
+      navigate('/dashboard/provider');
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Ein unerwarteter Fehler ist aufgetreten.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

@@ -17,8 +17,9 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import ProviderDashboard from "./pages/provider/ProviderDashboard";
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import ProviderDashboard from "./pages/dashboards/ProviderDashboard";
+import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,10 @@ const App = () => (
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/dashboard/admin" element={<AdminDashboard />} />
+              <Route path="/dashboard/provider" element={<ProviderDashboard />} />
+              <Route path="/dashboard/customer" element={<CustomerDashboard />} />
+              {/* Legacy routes for backward compatibility */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/provider" element={<ProviderDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

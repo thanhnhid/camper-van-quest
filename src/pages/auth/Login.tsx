@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,15 +7,56 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogIn, User, Building2, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
   });
 
-  const handleLogin = (userType: string) => {
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      redirectUserByRole(session.user.id);
+    }
+  };
+
+  const redirectUserByRole = async (userId: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+      
+      if (profile) {
+        switch (profile.role) {
+          case 'customer':
+            navigate('/dashboard/customer');
+            break;
+          case 'provider':
+            navigate('/dashboard/provider');
+            break;
+          case 'admin':
+            navigate('/dashboard/admin');
+            break;
+          default:
+            navigate('/');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+    }
+  };
+
+  const handleLogin = async () => {
     if (!loginData.email || !loginData.password) {
       toast({
         title: "Fehler",
@@ -25,10 +66,36 @@ const Login = () => {
       return;
     }
 
-    toast({
-      title: "Anmeldung erfolgreich",
-      description: `Willkommen als ${userType}!`
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        toast({
+          title: "Anmeldung fehlgeschlagen",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Anmeldung erfolgreich",
+          description: "Willkommen zurück!"
+        });
+        
+        redirectUserByRole(data.user.id);
+      }
+    } catch (error) {
+      toast({
+        title: "Fehler",
+        description: "Ein unerwarteter Fehler ist aufgetreten.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -89,11 +156,11 @@ const Login = () => {
                   />
                 </div>
                 <Button 
-                  onClick={() => handleLogin("Kunde")} 
+                  onClick={handleLogin} 
                   className="w-full"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
-                  Als Kunde anmelden
+                  Anmelden
                 </Button>
               </CardContent>
             </Card>
@@ -131,11 +198,11 @@ const Login = () => {
                   />
                 </div>
                 <Button 
-                  onClick={() => handleLogin("Anbieter")} 
+                  onClick={handleLogin} 
                   className="w-full"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
-                  Als Anbieter anmelden
+                  Anmelden
                 </Button>
               </CardContent>
             </Card>
@@ -173,11 +240,11 @@ const Login = () => {
                   />
                 </div>
                 <Button 
-                  onClick={() => handleLogin("Administrator")} 
+                  onClick={handleLogin} 
                   className="w-full"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
-                  Als Admin anmelden
+                  Anmelden
                 </Button>
               </CardContent>
             </Card>
