@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, User, LogIn, Phone, Mail, Clock, MapPin, Instagram, Twitter, Facebook } from "lucide-react";
+import { Car, User, LogIn, Phone, Mail, Clock, Instagram, Twitter, Facebook } from "lucide-react";
 
 const Header = () => {
   const location = useLocation();
