@@ -15,9 +15,9 @@ const Header = () => {
         
         <nav className="mx-6 flex items-center space-x-4 lg:space-x-6">
           <Link
-            to="/"
+            to="/campers"
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              location.pathname === "/" ? "text-primary" : "text-muted-foreground"
+              location.pathname === "/campers" ? "text-primary" : "text-muted-foreground"
             }`}
           >
             Wohnmobile
