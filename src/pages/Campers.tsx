@@ -171,7 +171,6 @@ const Campers = () => {
                     <SelectValue placeholder="Alle Antriebe" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Alle</SelectItem>
                     <SelectItem value="Diesel">Diesel</SelectItem>
                     <SelectItem value="Benzin">Benzin</SelectItem>
                     <SelectItem value="Elektro">Elektro</SelectItem>
