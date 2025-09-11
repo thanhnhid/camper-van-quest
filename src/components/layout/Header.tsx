@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, User, LogIn, Phone, Mail, Clock, Instagram, Twitter, Facebook } from "lucide-react";
+import { Car, User, LogIn, LogOut, Phone, Mail, Clock, Instagram, Twitter, Facebook } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const location = useLocation();
+  const { user, profile, signOut, loading } = useAuth();
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -82,18 +84,40 @@ const Header = () => {
         </nav>
         
         <div className="ml-auto flex items-center space-x-4">
-          <Link to="/login">
-            <Button variant="ghost" size="sm">
-              <LogIn className="mr-2 h-4 w-4" />
-              Anmelden
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button size="sm">
-              <User className="mr-2 h-4 w-4" />
-              Registrieren
-            </Button>
-          </Link>
+          {!loading && (
+            <>
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-muted-foreground">
+                    Willkommen, {profile?.first_name || user.email}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={signOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Abmelden
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Anmelden
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm">
+                      <User className="mr-2 h-4 w-4" />
+                      Registrieren
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </header>

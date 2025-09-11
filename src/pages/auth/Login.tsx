@@ -73,9 +73,19 @@ const Login = () => {
       });
 
       if (error) {
+        let errorMessage = "Ein Fehler ist aufgetreten.";
+        
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Bitte bestätigen Sie zunächst Ihre E-Mail-Adresse.";
+        } else if (error.message.includes("Too many requests")) {
+          errorMessage = "Zu viele Anmeldeversuche. Bitte warten Sie einen Moment.";
+        }
+        
         toast({
           title: "Anmeldung fehlgeschlagen",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive"
         });
         return;
