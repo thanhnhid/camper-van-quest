@@ -1,110 +1,221 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Shield, Lock, Eye, FileText, Mail, Phone, User, Settings, AlertTriangle, CheckCircle } from "lucide-react";
+
 const Privacy = () => {
   return (
-    <div className="container py-8 max-w-4xl">
-      <div className="prose prose-gray dark:prose-invert max-w-none">
-        <h1>Datenschutzerklärung</h1>
-        
-        <h2>1. Verantwortlicher</h2>
-        <p>
-          Verantwortlicher für die Datenverarbeitung ist:<br />
-          CamperQuest GmbH<br />
-          Musterstraße 123<br />
-          80333 München<br />
-          Deutschland<br />
-          E-Mail: datenschutz@camperquest.de
-        </p>
-
-        <h2>2. Arten der verarbeiteten Daten</h2>
-        <p>Wir verarbeiten folgende Kategorien von personenbezogenen Daten:</p>
-        <ul>
-          <li>Kontaktdaten (Name, E-Mail, Telefon, Adresse)</li>
-          <li>Buchungsdaten (Mietdauer, Fahrzeug, Zahlungsinformationen)</li>
-          <li>Technische Daten (IP-Adresse, Browser-Informationen)</li>
-          <li>Nutzungsdaten (Seitenaufrufe, Verweildauer)</li>
-        </ul>
-
-        <h2>3. Zweck der Datenverarbeitung</h2>
-        <p>Ihre Daten werden verarbeitet für:</p>
-        <ul>
-          <li>Durchführung von Buchungen und Mietverträgen</li>
-          <li>Kundenservice und Support</li>
-          <li>Abwicklung von Zahlungen</li>
-          <li>Verbesserung unserer Services</li>
-          <li>Erfüllung gesetzlicher Aufbewahrungspflichten</li>
-        </ul>
-
-        <h2>4. Rechtsgrundlage</h2>
-        <p>
-          Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 DSGVO:
-        </p>
-        <ul>
-          <li>Buchungsabwicklung: Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO)</li>
-          <li>Marketing: Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)</li>
-          <li>Aufbewahrung: Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c DSGVO)</li>
-        </ul>
-
-        <h2>5. Datenweitergabe</h2>
-        <p>
-          Ihre Daten werden nur in folgenden Fällen an Dritte weitergegeben:
-        </p>
-        <ul>
-          <li>An Zahlungsdienstleister für die Abwicklung von Zahlungen</li>
-          <li>An IT-Dienstleister für Hosting und technische Services</li>
-          <li>Bei gesetzlicher Verpflichtung an Behörden</li>
-        </ul>
-
-        <h2>6. Speicherdauer</h2>
-        <p>
-          Wir speichern Ihre Daten nur so lange wie nötig:
-        </p>
-        <ul>
-          <li>Buchungsdaten: 10 Jahre (steuerliche Aufbewahrungspflicht)</li>
-          <li>Kontaktdaten: Bis zum Widerruf oder Ende der Geschäftsbeziehung</li>
-          <li>Technische Daten: 30 Tage</li>
-        </ul>
-
-        <h2>7. Ihre Rechte</h2>
-        <p>Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
-        <ul>
-          <li>Auskunft über verarbeitete Daten (Art. 15 DSGVO)</li>
-          <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
-          <li>Löschung der Daten (Art. 17 DSGVO)</li>
-          <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-          <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
-          <li>Widerspruch gegen Verarbeitung (Art. 21 DSGVO)</li>
-        </ul>
-
-        <h2>8. Cookies</h2>
-        <p>
-          Unsere Website verwendet Cookies zur Verbesserung der Nutzererfahrung. 
-          Sie können Cookies in Ihren Browser-Einstellungen deaktivieren.
-        </p>
-
-        <h2>9. SSL-Verschlüsselung</h2>
-        <p>
-          Diese Website nutzt SSL-Verschlüsselung zum Schutz der Datenübertragung. 
-          Verschlüsselte Verbindungen erkennen Sie am "https://" in der Adresszeile.
-        </p>
-
-        <h2>10. Beschwerderecht</h2>
-        <p>
-          Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde über 
-          die Verarbeitung Ihrer personenbezogenen Daten zu beschweren.
-        </p>
-
-        <h2>11. Änderungen der Datenschutzerklärung</h2>
-        <p>
-          Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an 
-          geänderte Rechtslagen oder Funktionen anzupassen.
-        </p>
-
-        <div className="mt-8 p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            Stand: Januar 2024<br />
-            Bei Fragen zum Datenschutz kontaktieren Sie uns unter: 
-            datenschutz@camperquest.de
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <Shield className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl md:text-5xl font-bold">Datenschutzerklärung</h1>
+          </div>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Transparente Information über die Verarbeitung Ihrer personenbezogenen Daten
           </p>
+          <Badge variant="secondary" className="mt-4">
+            Letzte Aktualisierung: 01.01.2024
+          </Badge>
         </div>
+
+        {/* Privacy Highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card className="text-center p-6">
+            <CardContent className="p-0">
+              <Lock className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">SSL-Verschlüsselung</h3>
+              <p className="text-sm text-muted-foreground">Alle Datenübertragungen sind verschlüsselt</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center p-6">
+            <CardContent className="p-0">
+              <Eye className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Datenminimierung</h3>
+              <p className="text-sm text-muted-foreground">Wir erheben nur notwendige Daten</p>
+            </CardContent>
+          </Card>
+          <Card className="text-center p-6">
+            <CardContent className="p-0">
+              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">DSGVO-konform</h3>
+              <p className="text-sm text-muted-foreground">Vollständige Compliance mit EU-Recht</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Privacy Accordion */}
+        <Accordion type="single" collapsible className="space-y-4">
+          <AccordionItem value="controller" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <User className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">1. Verantwortlicher</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="space-y-3">
+                <p><strong>Verantwortliche Stelle im Sinne der DSGVO:</strong></p>
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="font-semibold">CamperQuest GmbH</p>
+                  <p>Alexanderplatz 1<br />10178 Berlin, Deutschland</p>
+                  <p>Telefon: +49 (0) 30 123 456 789<br />E-Mail: datenschutz@camperquest.de</p>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="data-types" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">2. Verarbeitete Datenarten</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-muted rounded-lg">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="border border-muted p-3 text-left font-semibold">Datenkategorie</th>
+                      <th className="border border-muted p-3 text-left font-semibold">Beispiele</th>
+                      <th className="border border-muted p-3 text-left font-semibold">Zweck</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-muted p-3 font-medium">Kontaktdaten</td>
+                      <td className="border border-muted p-3">Name, E-Mail, Telefon</td>
+                      <td className="border border-muted p-3">Buchungsabwicklung, Kommunikation</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-muted p-3 font-medium">Vertragsdaten</td>
+                      <td className="border border-muted p-3">Buchungsdetails, Zahlungsinformationen</td>
+                      <td className="border border-muted p-3">Vertragserfüllung</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-muted p-3 font-medium">Nutzungsdaten</td>
+                      <td className="border border-muted p-3">IP-Adresse, Browser, Cookies</td>
+                      <td className="border border-muted p-3">Website-Funktionalität</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="legal-basis" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <Settings className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">3. Rechtsgrundlagen</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="space-y-3">
+                <p><strong>Wir verarbeiten Ihre Daten auf folgenden Rechtsgrundlagen:</strong></p>
+                <ul className="list-disc list-inside space-y-2 ml-4">
+                  <li><strong>Art. 6 Abs. 1 lit. b DSGVO:</strong> Vertragserfüllung (Buchungsabwicklung)</li>
+                  <li><strong>Art. 6 Abs. 1 lit. a DSGVO:</strong> Einwilligung (Newsletter, Marketing)</li>
+                  <li><strong>Art. 6 Abs. 1 lit. f DSGVO:</strong> Berechtigte Interessen (Website-Analyse)</li>
+                  <li><strong>Art. 6 Abs. 1 lit. c DSGVO:</strong> Rechtliche Verpflichtung (Steuerrecht)</li>
+                </ul>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="storage" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <Lock className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">4. Speicherdauer</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="space-y-3">
+                <ul className="list-disc list-inside space-y-2 ml-4">
+                  <li><strong>Vertragsdaten:</strong> 10 Jahre (steuerrechtliche Aufbewahrungspflicht)</li>
+                  <li><strong>Kontaktdaten:</strong> Bis zum Widerruf oder Vertragsende</li>
+                  <li><strong>Website-Logs:</strong> 7 Tage automatische Löschung</li>
+                  <li><strong>Cookies:</strong> Je nach Cookie-Typ (siehe Cookie-Einstellungen)</li>
+                </ul>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="rights" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <Eye className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">5. Ihre Rechte</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="font-semibold text-primary">Informationsrechte:</p>
+                  <ul className="text-sm space-y-1">
+                    <li>• Auskunft über Ihre Daten</li>
+                    <li>• Berichtigung falscher Daten</li>
+                    <li>• Löschung Ihrer Daten</li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <p className="font-semibold text-primary">Kontrollrechte:</p>
+                  <ul className="text-sm space-y-1">
+                    <li>• Einschränkung der Verarbeitung</li>
+                    <li>• Datenübertragbarkeit</li>
+                    <li>• Widerspruch gegen Verarbeitung</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-4 p-4 bg-primary/10 rounded-lg">
+                <p className="text-sm"><strong>Kontakt für Datenschutzanfragen:</strong> datenschutz@camperquest.de</p>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="cookies" className="border rounded-lg px-6">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center space-x-3">
+                <Settings className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">6. Cookies & Tracking</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 text-muted-foreground">
+              <div className="space-y-4">
+                <p>Wir verwenden Cookies zur Verbesserung der Website-Funktionalität:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="p-4">
+                    <h4 className="font-semibold text-green-600 mb-2">Technisch notwendig</h4>
+                    <p className="text-sm">Session-Cookies für Warenkorbfunktion (keine Einwilligung erforderlich)</p>
+                  </Card>
+                  <Card className="p-4">
+                    <h4 className="font-semibold text-blue-600 mb-2">Analytisch</h4>
+                    <p className="text-sm">Website-Analyse mit anonymisierten Daten (mit Ihrer Einwilligung)</p>
+                  </Card>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        {/* Contact Support */}
+        <Card className="mt-12 border-primary/20">
+          <CardContent className="p-6 text-center">
+            <Mail className="h-8 w-8 text-primary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Datenschutzfragen?</h3>
+            <p className="text-muted-foreground mb-4">
+              Unser Datenschutzbeauftragter hilft Ihnen gerne weiter.
+            </p>
+            <div className="space-y-2">
+              <p className="font-medium">datenschutz@camperquest.de</p>
+              <p className="text-muted-foreground">Antwort innerhalb von 72 Stunden</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HeroSearch from "@/components/HeroSearch";
-import { Shield, Clock, Globe, Users, Star, Award, CheckCircle } from "lucide-react";
+import { Shield, Clock, Globe, Users, Star, Award, CheckCircle, Car, Phone, MessageSquare, Headphones, CreditCard, MapPin } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const Index = () => {
@@ -154,6 +154,108 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Unsere Services
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Vom ersten Klick bis zur Rückgabe - wir begleiten Sie auf Ihrer gesamten Reise
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Car className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Fahrzeugvermittlung</h3>
+                <p className="text-muted-foreground">
+                  Über 2.000 geprüfte Wohnmobile von Familien-Van bis Luxus-Liner. 
+                  Alle Fahrzeuge mit aktueller TÜV-Prüfung und Vollausstattung.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Vollkasko-Versicherung</h3>
+                <p className="text-muted-foreground">
+                  Umfassender Versicherungsschutz mit verschiedenen Selbstbeteiligungen. 
+                  Zusätzlich Diebstahl-, Glas- und Innenraumschutz buchbar.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Phone className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">24/7 Pannenhilfe</h3>
+                <p className="text-muted-foreground">
+                  Europaweiter Pannenservice und Notruf-Hotline. Bei Problemen organisieren 
+                  wir Ersatzfahrzeuge oder Reparaturen vor Ort.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <MapPin className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Flexible Abholung</h3>
+                <p className="text-muted-foreground">
+                  Abhol- und Rückgabestationen in über 150 deutschen Städten. 
+                  Auch One-Way-Mieten europaweit möglich.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Headphones className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Persönliche Beratung</h3>
+                <p className="text-muted-foreground">
+                  Individuelle Reiseplanung durch unsere Experten. Routenempfehlungen, 
+                  Campingplatz-Tipps und Länderinformationen inklusive.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow">
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <CreditCard className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Sichere Zahlung</h3>
+                <p className="text-muted-foreground">
+                  SSL-verschlüsselte Zahlungsabwicklung mit allen gängigen Zahlungsmethoden. 
+                  Anzahlung ab 20%, Rest bei Abholung.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/about">
+              <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
+                Mehr über uns erfahren
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

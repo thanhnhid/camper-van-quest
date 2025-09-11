@@ -15,6 +15,8 @@ import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProviderDashboard from "./pages/provider/ProviderDashboard";
 
@@ -34,6 +36,8 @@ const App = () => (
               <Route path="/campers" element={<Campers />} />
               <Route path="/camper/:id" element={<CamperDetails />} />
               <Route path="/booking/:id" element={<Booking />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
