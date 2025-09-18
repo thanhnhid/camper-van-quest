@@ -88,14 +88,16 @@ const Header = () => {
             <>
               {user ? (
                 <div className="flex items-center space-x-4">
-                  {profile?.role === 'admin' && (
-                    <Link to="/dashboard/admin">
-                      <Button variant="ghost" size="sm">
-                        <User className="mr-2 h-4 w-4" />
-                        Profil
-                      </Button>
-                    </Link>
-                  )}
+                  <Link to={
+                    profile?.role === 'admin' ? '/dashboard/admin' :
+                    profile?.role === 'provider' ? '/dashboard/provider' :
+                    '/dashboard/customer'
+                  }>
+                    <Button variant="ghost" size="sm">
+                      <User className="mr-2 h-4 w-4" />
+                      Profil
+                    </Button>
+                  </Link>
                   <Button 
                     variant="ghost" 
                     size="sm" 
