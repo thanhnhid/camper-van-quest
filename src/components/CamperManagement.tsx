@@ -197,14 +197,17 @@ export function CamperManagement() {
                     size="sm"
                     onClick={() => handleEditCamper(camper)}
                     disabled={camper.status === 'archived'}
+                    className="flex items-center space-x-1"
                   >
                     <Edit className="h-4 w-4" />
+                    <span className="hidden sm:inline">Bearbeiten</span>
                   </Button>
                   
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="text-red-600">
+                      <Button variant="outline" size="sm" className="text-red-600 flex items-center space-x-1">
                         <Trash2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Löschen</span>
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -212,7 +215,7 @@ export function CamperManagement() {
                         <AlertDialogTitle>Camper löschen</AlertDialogTitle>
                         <AlertDialogDescription>
                           Sind Sie sicher, dass Sie "{camper.name}" löschen möchten? 
-                          Diese Aktion kann nicht rückgängig gemacht werden.
+                          Diese Aktion kann nicht rückgängig gemacht werden und der Camper wird sofort von der Website entfernt.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -221,7 +224,7 @@ export function CamperManagement() {
                           onClick={() => handleDeleteCamper(camper.id)}
                           className="bg-red-600 hover:bg-red-700"
                         >
-                          Löschen
+                          Endgültig löschen
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
