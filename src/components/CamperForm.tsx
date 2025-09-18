@@ -72,7 +72,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
     for (let i = 0; i < selectedFiles.length; i++) {
       const file = selectedFiles[i];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${camperId}/${Date.now()}-${i}.${fileExt}`;
+      const fileName = `${profile.user_id}/${camperId}-${Date.now()}-${i}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('camper-images')
