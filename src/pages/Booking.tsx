@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Booking = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const camper = mockCampers.find(c => c.id === id);
   
@@ -24,6 +25,20 @@ const Booking = () => {
     finalCleaning: false,
     deposit: true
   });
+
+  // Load dates from URL parameters when component mounts
+  useEffect(() => {
+    const startParam = searchParams.get('start');
+    const endParam = searchParams.get('end');
+    
+    if (startParam && endParam) {
+      setBookingData(prev => ({
+        ...prev,
+        startDate: startParam,
+        endDate: endParam
+      }));
+    }
+  }, [searchParams]);
 
   if (!camper) {
     return (
