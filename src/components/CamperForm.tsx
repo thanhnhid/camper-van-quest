@@ -139,7 +139,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
           .eq('id', editingCamper.id);
 
         if (error) throw error;
-        toast.success("Camper wurde erfolgreich aktualisiert");
+        toast.success("Camper wurde erfolgreich aktualisiert und ist jetzt verfügbar");
       } else {
         const { data, error } = await supabase
           .from('campers')
@@ -147,7 +147,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
           .select('*');
 
         if (error) throw error;
-        toast.success("Camper wurde erfolgreich veröffentlicht");
+        toast.success("Camper wurde erfolgreich veröffentlicht und ist sofort verfügbar");
       }
 
       // Kurz warten um sicherzustellen, dass die Daten gespeichert sind
@@ -342,7 +342,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
               Abbrechen
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Speichern..." : (editingCamper ? "Aktualisieren" : "Camper einreichen")}
+              {loading ? "Speichern..." : (editingCamper ? "Aktualisieren" : "Camper veröffentlichen")}
             </Button>
           </div>
         </form>

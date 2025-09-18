@@ -73,7 +73,7 @@ export default function AddCamper() {
             <CardContent>
               <p className="text-muted-foreground mb-6">
                 Füllen Sie alle erforderlichen Informationen aus, um Ihren Camper zu veröffentlichen.
-                Nach der Übermittlung wird Ihr Camper von unserem Team überprüft.
+                Ihr Camper wird sofort nach dem Speichern verfügbar sein.
               </p>
               
               <CamperForm
