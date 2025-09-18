@@ -109,14 +109,22 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       return;
     }
 
+    console.log('Starting camper submission...');
+    console.log('Profile:', profile);
+    console.log('Form data:', data);
+    console.log('Selected features:', selectedFeatures);
+    console.log('Selected files:', selectedFiles.length);
+
     setLoading(true);
     try {
       let imageUrls: string[] = editingCamper?.images || [];
       
       // Upload new images if any selected
       if (selectedFiles.length > 0) {
+        console.log('Uploading images...');
         const tempId = editingCamper?.id || Date.now().toString();
         const newImageUrls = await uploadImages(tempId);
+        console.log('Uploaded image URLs:', newImageUrls);
         imageUrls = [...imageUrls, ...newImageUrls];
       }
 
@@ -132,21 +140,33 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
         status: 'approved' // Camper wird direkt genehmigt
       };
 
+      console.log('Submitting camper data:', camperData);
+
       if (editingCamper) {
+        console.log('Updating existing camper...');
         const { error } = await supabase
           .from('campers')
           .update(camperData)
           .eq('id', editingCamper.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
+        console.log('Camper updated successfully');
         toast.success("Camper wurde erfolgreich aktualisiert und ist jetzt verfügbar");
       } else {
-        const { data, error } = await supabase
+        console.log('Inserting new camper...');
+        const { data: insertedData, error } = await supabase
           .from('campers')
           .insert([camperData])
           .select('*');
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+        console.log('Camper inserted successfully:', insertedData);
         toast.success("Camper wurde erfolgreich veröffentlicht und ist sofort verfügbar");
       }
 
@@ -156,10 +176,10 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       onSuccess();
     } catch (error) {
       console.error('Error saving camper:', error);
-      toast.error("Fehler beim Speichern des Campers");
+      toast.error("Fehler beim Speichern des Campers: " + (error as any)?.message);
     } finally {
       setLoading(false);
-    }
+    }  
   };
 
   const handleFeatureToggle = (feature: string) => {
