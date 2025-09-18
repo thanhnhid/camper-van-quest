@@ -76,11 +76,13 @@ const Login = () => {
         let errorMessage = "Ein Fehler ist aufgetreten.";
         
         if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort.";
+          errorMessage = "Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort oder registrieren Sie sich zuerst.";
         } else if (error.message.includes("Email not confirmed")) {
-          errorMessage = "Bitte bestätigen Sie zunächst Ihre E-Mail-Adresse.";
+          errorMessage = "Bitte bestätigen Sie zunächst Ihre E-Mail-Adresse. Überprüfen Sie Ihr E-Mail-Postfach.";
         } else if (error.message.includes("Too many requests")) {
           errorMessage = "Zu viele Anmeldeversuche. Bitte warten Sie einen Moment.";
+        } else if (error.message.includes("User not found")) {
+          errorMessage = "Kein Benutzer mit dieser E-Mail-Adresse gefunden. Bitte registrieren Sie sich zuerst.";
         }
         
         toast({
@@ -116,6 +118,11 @@ const Login = () => {
           <p className="text-muted-foreground mt-2">
             Melden Sie sich in Ihrem CamperQuest Konto an
           </p>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Hinweis:</strong> Falls Sie sich gerade registriert haben, müssen Sie möglicherweise erst Ihre E-Mail-Adresse bestätigen, bevor Sie sich anmelden können.
+            </p>
+          </div>
         </div>
 
         <Tabs defaultValue="customer" className="space-y-4">

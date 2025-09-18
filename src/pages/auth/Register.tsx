@@ -61,7 +61,7 @@ const Register = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: customerData.email,
         password: customerData.password,
         options: {
@@ -83,13 +83,23 @@ const Register = () => {
         return;
       }
 
-      toast({
-        title: "Registrierung erfolgreich",
-        description: "Ihr Kundenkonto wurde erfolgreich erstellt! Bitte überprüfen Sie Ihre E-Mails."
-      });
-      
-      navigate('/dashboard/customer');
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        toast({
+          title: "Registrierung erfolgreich",
+          description: "Bitte überprüfen Sie Ihre E-Mails und bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden können."
+        });
+        navigate('/login');
+      } else if (data.session) {
+        // User is immediately logged in (email confirmation disabled)
+        toast({
+          title: "Registrierung erfolgreich",
+          description: "Ihr Kundenkonto wurde erfolgreich erstellt und Sie sind angemeldet!"
+        });
+        navigate('/dashboard/customer');
+      }
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: "Fehler",
         description: "Ein unerwarteter Fehler ist aufgetreten.",
@@ -127,7 +137,7 @@ const Register = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: providerData.email,
         password: providerData.password,
         options: {
@@ -149,13 +159,23 @@ const Register = () => {
         return;
       }
 
-      toast({
-        title: "Registrierung erfolgreich",
-        description: "Ihr Anbieter-Konto wurde erfolgreich erstellt! Bitte überprüfen Sie Ihre E-Mails."
-      });
-      
-      navigate('/dashboard/provider');
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        toast({
+          title: "Registrierung erfolgreich",
+          description: "Bitte überprüfen Sie Ihre E-Mails und bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden können."
+        });
+        navigate('/login');
+      } else if (data.session) {
+        // User is immediately logged in (email confirmation disabled)
+        toast({
+          title: "Registrierung erfolgreich",
+          description: "Ihr Anbieter-Konto wurde erfolgreich erstellt und Sie sind angemeldet!"
+        });
+        navigate('/dashboard/provider');
+      }
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: "Fehler",
         description: "Ein unerwarteter Fehler ist aufgetreten.",
