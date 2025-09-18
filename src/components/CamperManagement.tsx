@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { CamperUploadForm } from "./CamperUploadForm";
-import { TermsDialog } from "./TermsDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,24 +36,17 @@ interface Camper {
 
 export function CamperManagement() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [campers, setCampers] = useState<Camper[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [editingCamper, setEditingCamper] = useState<Camper | null>(null);
 
   useEffect(() => {
     if (profile) {
-      checkTermsAcceptance();
       fetchCampers();
     }
   }, [profile]);
-
-  const checkTermsAcceptance = async () => {
-    if (!profile?.terms_accepted) {
-      setShowTermsDialog(true);
-    }
-  };
 
   const fetchCampers = async () => {
     if (!profile) return;
@@ -76,19 +69,10 @@ export function CamperManagement() {
   };
 
   const handleAddCamper = () => {
-    if (!profile?.terms_accepted) {
-      setShowTermsDialog(true);
-      return;
-    }
-    setEditingCamper(null);
-    setShowUploadForm(true);
+    navigate('/provider/add-camper');
   };
 
   const handleEditCamper = (camper: Camper) => {
-    if (!profile?.terms_accepted) {
-      setShowTermsDialog(true);
-      return;
-    }
     setEditingCamper(camper);
     setShowUploadForm(true);
   };
@@ -236,15 +220,6 @@ export function CamperManagement() {
           ))}
         </div>
       )}
-
-      <TermsDialog
-        open={showTermsDialog}
-        onOpenChange={setShowTermsDialog}
-        onAccept={() => {
-          fetchCampers();
-          setShowTermsDialog(false);
-        }}
-      />
 
       <CamperUploadForm
         open={showUploadForm}
