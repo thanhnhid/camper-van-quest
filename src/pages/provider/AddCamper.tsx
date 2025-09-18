@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CamperUploadForm } from "@/components/CamperUploadForm";
+import { CamperForm } from "@/components/CamperForm";
 import { TermsDialog } from "@/components/TermsDialog";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -11,7 +11,7 @@ export default function AddCamper() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [showTermsDialog, setShowTermsDialog] = useState(false);
-  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -23,7 +23,7 @@ export default function AddCamper() {
     if (!profile?.terms_accepted) {
       setShowTermsDialog(true);
     } else {
-      setShowUploadForm(true);
+      setShowForm(true);
     }
   };
 
@@ -65,37 +65,41 @@ export default function AddCamper() {
         </div>
 
         {/* Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Camper-Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-6">
-              Füllen Sie alle erforderlichen Informationen aus, um Ihren Camper zu veröffentlichen.
-              Nach der Übermittlung wird Ihr Camper von unserem Team überprüft.
-            </p>
-          </CardContent>
-        </Card>
+        {showForm ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Camper-Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-6">
+                Füllen Sie alle erforderlichen Informationen aus, um Ihren Camper zu veröffentlichen.
+                Nach der Übermittlung wird Ihr Camper von unserem Team überprüft.
+              </p>
+              
+              <CamperForm
+                onSuccess={handleSuccess}
+                onCancel={handleCancel}
+                editingCamper={null}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-gray-500">
+                Sie müssen zuerst die Nutzungsbedingungen akzeptieren, um einen Camper hinzuzufügen.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         <TermsDialog
           open={showTermsDialog}
           onOpenChange={setShowTermsDialog}
           onAccept={() => {
             setShowTermsDialog(false);
-            setShowUploadForm(true);
+            setShowForm(true);
           }}
-        />
-
-        <CamperUploadForm
-          open={showUploadForm}
-          onOpenChange={(open) => {
-            setShowUploadForm(open);
-            if (!open) {
-              handleCancel();
-            }
-          }}
-          onSuccess={handleSuccess}
-          editingCamper={null}
         />
       </div>
     </div>
