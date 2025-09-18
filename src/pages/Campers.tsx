@@ -1,7 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import CamperCard from "@/components/CamperCard";
-import { mockCampers } from "@/data/campers";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,36 +8,79 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Package } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Camper {
+  id: string;
+  name: string;
+  description: string | null;
+  price_per_day: number;
+  location: string;
+  capacity: number;
+  features: string[];
+  images: string[];
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const Campers = () => {
   const [searchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
+  const [campers, setCampers] = useState<Camper[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   
   // Filter states
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [locationFilter, setLocationFilter] = useState(searchParams.get("location") || "");
-  const [minBeds, setMinBeds] = useState("");
-  const [maxBeds, setMaxBeds] = useState("");
-  const [fuelType, setFuelType] = useState("");
+  const [minCapacity, setMinCapacity] = useState("");
+  const [maxCapacity, setMaxCapacity] = useState("");
   const [features, setFeatures] = useState<string[]>([]);
 
-  const availableFeatures = ["Küche", "Dusche", "Klimaanlage", "Markise", "Fahrradträger", "Solarpanel"];
+  const availableFeatures = ["Küche", "Bad/WC", "Dusche", "Heizung", "Klimaanlage", "TV", "WiFi", 
+    "Markise", "Fahrräder", "Sat-Anlage", "Solar", "Generator", "Kühlschrank", "Gefrierfach"];
+
+  useEffect(() => {
+    fetchCampers();
+  }, []);
+
+  const fetchCampers = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('campers')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCampers(data || []);
+    } catch (error) {
+      console.error('Error fetching campers:', error);
+      toast({
+        title: "Fehler",
+        description: "Wohnmobile konnten nicht geladen werden",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredCampers = useMemo(() => {
-    return mockCampers.filter(camper => {
+    return campers.filter(camper => {
       // Price filter
-      if (camper.price < priceRange[0] || camper.price > priceRange[1]) return false;
+      if (camper.price_per_day < priceRange[0] || camper.price_per_day > priceRange[1]) return false;
       
       // Location filter
       if (locationFilter && !camper.location.toLowerCase().includes(locationFilter.toLowerCase())) return false;
       
-      // Beds filter
-      if (minBeds && camper.specifications.sleeps < parseInt(minBeds)) return false;
-      if (maxBeds && camper.specifications.sleeps > parseInt(maxBeds)) return false;
-      
-      // Fuel type filter
-      if (fuelType && camper.specifications.fuel !== fuelType) return false;
+      // Capacity filter
+      if (minCapacity && camper.capacity < parseInt(minCapacity)) return false;
+      if (maxCapacity && camper.capacity > parseInt(maxCapacity)) return false;
       
       // Features filter
       if (features.length > 0) {
@@ -52,7 +94,7 @@ const Campers = () => {
       
       return true;
     });
-  }, [priceRange, locationFilter, minBeds, maxBeds, fuelType, features]);
+  }, [campers, priceRange, locationFilter, minCapacity, maxCapacity, features]);
 
   const handleFeatureToggle = (feature: string, checked: boolean) => {
     if (checked) {
@@ -65,11 +107,18 @@ const Campers = () => {
   const clearAllFilters = () => {
     setPriceRange([0, 200]);
     setLocationFilter("");
-    setMinBeds("");
-    setMaxBeds("");
-    setFuelType("");
+    setMinCapacity("");
+    setMaxCapacity("");
     setFeatures([]);
   };
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Lade Wohnmobile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-8">
@@ -127,11 +176,11 @@ const Campers = () => {
                 />
               </div>
 
-              {/* Beds */}
+              {/* Capacity */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-2">
-                  <Label htmlFor="min-beds">Min. Betten</Label>
-                  <Select value={minBeds} onValueChange={setMinBeds}>
+                  <Label htmlFor="min-capacity">Min. Personen</Label>
+                  <Select value={minCapacity} onValueChange={setMinCapacity}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
@@ -146,8 +195,8 @@ const Campers = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="max-beds">Max. Betten</Label>
-                  <Select value={maxBeds} onValueChange={setMaxBeds}>
+                  <Label htmlFor="max-capacity">Max. Personen</Label>
+                  <Select value={maxCapacity} onValueChange={setMaxCapacity}>
                     <SelectTrigger>
                       <SelectValue placeholder="Max" />
                     </SelectTrigger>
@@ -161,21 +210,6 @@ const Campers = () => {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              {/* Fuel Type */}
-              <div className="space-y-2">
-                <Label>Antriebsart</Label>
-                <Select value={fuelType} onValueChange={setFuelType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Antriebe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Diesel">Diesel</SelectItem>
-                    <SelectItem value="Benzin">Benzin</SelectItem>
-                    <SelectItem value="Elektro">Elektro</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Features */}
@@ -204,17 +238,48 @@ const Campers = () => {
         <div className="flex-1">
           {filteredCampers.length === 0 ? (
             <div className="text-center py-12">
+              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <p className="text-lg text-muted-foreground mb-4">
-                Keine Wohnmobile gefunden, die Ihren Suchkriterien entsprechen.
+                {campers.length === 0 
+                  ? "Noch keine Wohnmobile verfügbar."
+                  : "Keine Wohnmobile gefunden, die Ihren Suchkriterien entsprechen."
+                }
               </p>
-              <Button onClick={clearAllFilters} variant="outline">
-                Filter zurücksetzen
-              </Button>
+              {campers.length > 0 && (
+                <Button onClick={clearAllFilters} variant="outline">
+                  Filter zurücksetzen
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredCampers.map((camper) => (
-                <CamperCard key={camper.id} camper={camper} />
+                <CamperCard 
+                  key={camper.id} 
+                  camper={{
+                    id: camper.id,
+                    name: camper.name,
+                    description: camper.description || "",
+                    brand: "Unbekannt",
+                    model: "",
+                    year: new Date().getFullYear(),
+                    price: camper.price_per_day,
+                    location: camper.location,
+                    images: camper.images.length > 0 ? camper.images : ["/placeholder.svg"],
+                    rating: 4.5,
+                    reviewCount: 0,
+                    available: true,
+                    features: camper.features,
+                    specifications: {
+                      sleeps: camper.capacity,
+                      length: 6.5,
+                      width: 2.3,
+                      height: 2.8,
+                      fuel: "Diesel",
+                      transmission: "Manuell"
+                    }
+                  }} 
+                />
               ))}
             </div>
           )}
