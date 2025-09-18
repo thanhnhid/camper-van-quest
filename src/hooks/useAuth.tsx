@@ -90,6 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error('Error signing out:', error);
+    } else {
+      // Redirect to homepage after successful logout
+      window.location.href = '/';
     }
   };
 
