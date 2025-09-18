@@ -87,31 +87,14 @@ const Header = () => {
           {!loading && (
             <>
               {user ? (
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-muted-foreground">
-                    Willkommen, {profile?.first_name || user.email}
-                  </span>
-                  <Link 
-                    to={
-                      profile?.role === 'admin' ? '/dashboard/admin' :
-                      profile?.role === 'provider' ? '/dashboard/provider' :
-                      '/dashboard/customer'
-                    }
-                  >
-                    <Button variant="ghost" size="sm">
-                      <User className="mr-2 h-4 w-4" />
-                      Profil
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={signOut}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Abmelden
-                  </Button>
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={signOut}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Abmelden
+                </Button>
               ) : (
                 <>
                   <Link to="/login">
