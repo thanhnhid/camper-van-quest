@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      campers: {
+        Row: {
+          capacity: number
+          created_at: string
+          description: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          location: string
+          name: string
+          price_per_day: number
+          provider_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity: number
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          location: string
+          name: string
+          price_per_day: number
+          provider_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          location?: string
+          name?: string
+          price_per_day?: number
+          provider_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -25,6 +78,8 @@ export type Database = {
           phone: string | null
           points: number | null
           role: Database["public"]["Enums"]["user_role"]
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string
         }
@@ -38,6 +93,8 @@ export type Database = {
           phone?: string | null
           points?: number | null
           role?: Database["public"]["Enums"]["user_role"]
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -51,6 +108,8 @@ export type Database = {
           phone?: string | null
           points?: number | null
           role?: Database["public"]["Enums"]["user_role"]
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
         }

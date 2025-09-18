@@ -12,6 +12,8 @@ interface UserProfile {
   phone: string | null;
   address: string | null;
   points: number | null;
+  terms_accepted: boolean | null;
+  terms_accepted_at: string | null;
 }
 
 interface AuthContextType {
