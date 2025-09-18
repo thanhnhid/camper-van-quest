@@ -91,6 +91,18 @@ const Header = () => {
                   <span className="text-sm text-muted-foreground">
                     Willkommen, {profile?.first_name || user.email}
                   </span>
+                  <Link 
+                    to={
+                      profile?.role === 'admin' ? '/dashboard/admin' :
+                      profile?.role === 'provider' ? '/dashboard/provider' :
+                      '/dashboard/customer'
+                    }
+                  >
+                    <Button variant="ghost" size="sm">
+                      <User className="mr-2 h-4 w-4" />
+                      Profil
+                    </Button>
+                  </Link>
                   <Button 
                     variant="ghost" 
                     size="sm" 
