@@ -50,7 +50,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/provider" className="text-muted-foreground hover:text-foreground">
+                <Link to="/register" className="text-muted-foreground hover:text-foreground">
                   Anbieter werden
                 </Link>
               </li>
