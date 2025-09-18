@@ -24,7 +24,8 @@ const Register = () => {
 
   const [providerData, setProviderData] = useState({
     companyName: "",
-    contactPerson: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     password: "",
@@ -109,7 +110,7 @@ const Register = () => {
   };
 
   const handleProviderRegister = async () => {
-    if (!providerData.companyName || !providerData.contactPerson || !providerData.email || !providerData.password) {
+    if (!providerData.firstName || !providerData.lastName || !providerData.email || !providerData.password) {
       toast({
         title: "Fehler",
         description: "Bitte füllen Sie alle Pflichtfelder aus.",
@@ -143,8 +144,8 @@ const Register = () => {
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            first_name: providerData.companyName,
-            last_name: providerData.contactPerson,
+            first_name: providerData.firstName,
+            last_name: providerData.lastName,
             role: 'provider'
           }
         }
@@ -301,20 +302,30 @@ const Register = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="companyName">Firmenname *</Label>
+                  <Label htmlFor="companyName">Firmenname</Label>
                   <Input
                     id="companyName"
                     value={providerData.companyName}
                     onChange={(e) => setProviderData({...providerData, companyName: e.target.value})}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="contactPerson">Ansprechpartner *</Label>
-                  <Input
-                    id="contactPerson"
-                    value={providerData.contactPerson}
-                    onChange={(e) => setProviderData({...providerData, contactPerson: e.target.value})}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="provider-firstName">Vorname *</Label>
+                    <Input
+                      id="provider-firstName"
+                      value={providerData.firstName}
+                      onChange={(e) => setProviderData({...providerData, firstName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="provider-lastName">Nachname *</Label>
+                    <Input
+                      id="provider-lastName"
+                      value={providerData.lastName}
+                      onChange={(e) => setProviderData({...providerData, lastName: e.target.value})}
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="provider-reg-email">E-Mail *</Label>
