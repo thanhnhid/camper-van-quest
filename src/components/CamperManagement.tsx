@@ -48,6 +48,18 @@ export function CamperManagement() {
     }
   }, [profile]);
 
+  // Refresh campers when component mounts or becomes visible again
+  useEffect(() => {
+    const handleFocus = () => {
+      if (profile) {
+        fetchCampers();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [profile]);
+
   const fetchCampers = async () => {
     if (!profile) return;
 

@@ -141,14 +141,18 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
         if (error) throw error;
         toast.success("Camper wurde zur Prüfung aktualisiert");
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('campers')
-          .insert([camperData]);
+          .insert([camperData])
+          .select('*');
 
         if (error) throw error;
         toast.success("Camper wurde zur Prüfung eingereicht");
       }
 
+      // Kurz warten um sicherzustellen, dass die Daten gespeichert sind
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       onSuccess();
     } catch (error) {
       console.error('Error saving camper:', error);
