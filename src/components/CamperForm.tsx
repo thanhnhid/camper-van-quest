@@ -129,7 +129,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
         features: selectedFeatures,
         images: imageUrls,
         provider_id: profile.id,
-        status: 'pending'
+        status: 'approved'
       };
 
       if (editingCamper) {
@@ -139,7 +139,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
           .eq('id', editingCamper.id);
 
         if (error) throw error;
-        toast.success("Camper wurde zur Prüfung aktualisiert");
+        toast.success("Camper wurde erfolgreich aktualisiert");
       } else {
         const { data, error } = await supabase
           .from('campers')
@@ -147,7 +147,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
           .select('*');
 
         if (error) throw error;
-        toast.success("Camper wurde zur Prüfung eingereicht");
+        toast.success("Camper wurde erfolgreich veröffentlicht");
       }
 
       // Kurz warten um sicherzustellen, dass die Daten gespeichert sind
