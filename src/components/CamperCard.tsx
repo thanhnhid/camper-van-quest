@@ -63,6 +63,7 @@ const CamperCard = ({ camper }: CamperCardProps) => {
           <Button 
             className="w-full" 
             disabled={!camper.available}
+            onClick={() => console.log('Navigating to camper details:', camper.id)}
           >
             {camper.available ? "Details ansehen" : "Nicht verfügbar"}
           </Button>
