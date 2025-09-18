@@ -19,7 +19,7 @@ const camperSchema = z.object({
   price_per_day: z.number().min(1, "Preis muss größer als 0 sein"),
   location: z.string().min(1, "Standort ist erforderlich"),
   capacity: z.number().min(1, "Kapazität muss mindestens 1 Person sein"),
-  features: z.array(z.string()).min(1, "Mindestens ein Feature ist erforderlich"),
+  features: z.array(z.string()).optional().default([]),
 });
 
 type CamperFormData = z.infer<typeof camperSchema>;
@@ -76,7 +76,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       
       const { error: uploadError } = await supabase.storage
         .from('camper-images')
-        .upload(fileName, file);
+        .upload(fileName, file, { upsert: true, contentType: file.type });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
@@ -99,15 +99,6 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       return;
     }
 
-    if (selectedFeatures.length === 0) {
-      toast.error("Mindestens ein Feature ist erforderlich");
-      return;
-    }
-
-    if (selectedFiles.length === 0 && !editingCamper?.images?.length) {
-      toast.error("Mindestens ein Bild ist erforderlich");
-      return;
-    }
 
     console.log('Starting camper submission...');
     console.log('Profile:', profile);
@@ -122,7 +113,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       // Upload new images if any selected
       if (selectedFiles.length > 0) {
         console.log('Uploading images...');
-        const tempId = editingCamper?.id || Date.now().toString();
+        const tempId = editingCamper?.id || (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now()));
         const newImageUrls = await uploadImages(tempId);
         console.log('Uploaded image URLs:', newImageUrls);
         imageUrls = [...imageUrls, ...newImageUrls];
