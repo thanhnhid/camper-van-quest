@@ -129,7 +129,7 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
         features: selectedFeatures,
         images: imageUrls,
         provider_id: profile.id,
-        status: 'approved'
+        status: 'approved' // Camper wird direkt genehmigt
       };
 
       if (editingCamper) {

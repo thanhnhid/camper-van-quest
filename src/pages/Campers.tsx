@@ -45,6 +45,12 @@ const Campers = () => {
 
   useEffect(() => {
     fetchCampers();
+    
+    // Refresh campers when window gets focus (e.g., returning from another tab)
+    const handleFocus = () => fetchCampers();
+    window.addEventListener('focus', handleFocus);
+    
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const fetchCampers = async () => {
