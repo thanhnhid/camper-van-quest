@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          camper_id: string
+          created_at: string
+          customer_id: string
+          end_date: string
+          id: string
+          start_date: string
+          status: string
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          camper_id: string
+          created_at?: string
+          customer_id: string
+          end_date: string
+          id?: string
+          start_date: string
+          status?: string
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          camper_id?: string
+          created_at?: string
+          customer_id?: string
+          end_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_camper_id_fkey"
+            columns: ["camper_id"]
+            isOneToOne: false
+            referencedRelation: "campers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campers: {
         Row: {
           capacity: number
