@@ -122,10 +122,33 @@ export function BookingManagement() {
 
       if (error) throw error;
 
+      // Send email notification to customer
+      const booking = bookings.find(b => b.id === bookingId);
+      if (booking) {
+        try {
+          await supabase.functions.invoke('send-booking-notification', {
+            body: {
+              customerEmail: booking.customer.email,
+              customerName: `${booking.customer.first_name} ${booking.customer.last_name}`.trim(),
+              camperName: booking.camper.name,
+              startDate: booking.start_date,
+              endDate: booking.end_date,
+              status: status,
+              providerName: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : undefined,
+              providerEmail: profile?.email,
+              totalPrice: booking.total_price
+            }
+          });
+        } catch (emailError) {
+          console.error('Error sending email notification:', emailError);
+          // Don't fail the booking update if email fails
+        }
+      }
+
       toast.success(
         status === 'confirmed' 
-          ? 'Buchung wurde bestätigt' 
-          : 'Buchung wurde abgelehnt'
+          ? 'Buchung wurde bestätigt und Kunde benachrichtigt' 
+          : 'Buchung wurde abgelehnt und Kunde benachrichtigt'
       );
       
       fetchBookings(); // Refresh the list
