@@ -8,17 +8,30 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Star, Users, MapPin, Fuel, Settings, Ruler, CalendarIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { mockCampers } from "@/data/campers";
 import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInDays, isSameDay, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
+interface Camper {
+  id: string;
+  name: string;
+  description: string | null;
+  price_per_day: number;
+  location: string;
+  capacity: number;
+  features: string[];
+  images: string[];
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const CamperDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
-  const camper = mockCampers.find(c => c.id === id);
-  
+  const [camper, setCamper] = useState<Camper | null>(null);
+  const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
@@ -26,10 +39,42 @@ const CamperDetails = () => {
   const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
   useEffect(() => {
+    if (id) {
+      fetchCamper();
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (camper?.id) {
       fetchBlockedDates();
     }
   }, [camper?.id]);
+
+  const fetchCamper = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('campers')
+        .select('*')
+        .eq('id', id)
+        .eq('status', 'approved')
+        .single();
+
+      if (error) throw error;
+      setCamper(data);
+    } catch (error) {
+      console.error('Error fetching camper:', error);
+      toast({
+        title: "Fehler",
+        description: "Wohnmobil konnte nicht geladen werden",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchBlockedDates = async () => {
     if (!camper?.id) return;
@@ -116,14 +161,22 @@ const CamperDetails = () => {
     return differenceInDays(endDate, startDate) + 1;
   };
 
-  const totalPrice = calculateDays() * (camper?.price || 0);
+  const totalPrice = calculateDays() * (camper?.price_per_day || 0);
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Lade Wohnmobil...</div>
+      </div>
+    );
+  }
 
   if (!camper) {
     return (
       <div className="container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Wohnmobil nicht gefunden</h1>
-          <Link to="/">
+          <Link to="/campers">
             <Button className="mt-4">Zurück zur Übersicht</Button>
           </Link>
         </div>
@@ -137,21 +190,31 @@ const CamperDetails = () => {
         {/* Image Gallery */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
-            <img
-              src={camper.images[0]}
-              alt={camper.name}
-              className="w-full h-96 object-cover rounded-lg"
-            />
-            <div className="grid grid-cols-2 gap-4">
-              {camper.images.slice(1).map((image, index) => (
+            {camper.images.length > 0 ? (
+              <>
                 <img
-                  key={index}
-                  src={image}
-                  alt={`${camper.name} ${index + 2}`}
-                  className="w-full h-48 object-cover rounded-lg"
+                  src={camper.images[0]}
+                  alt={camper.name}
+                  className="w-full h-96 object-cover rounded-lg"
                 />
-              ))}
-            </div>
+                {camper.images.length > 1 && (
+                  <div className="grid grid-cols-2 gap-4">
+                    {camper.images.slice(1).map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`${camper.name} ${index + 2}`}
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500">Keine Bilder verfügbar</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -161,10 +224,10 @@ const CamperDetails = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl">{camper.price}€</CardTitle>
+                  <CardTitle className="text-2xl">{camper.price_per_day}€</CardTitle>
                   <p className="text-sm text-muted-foreground">pro Tag</p>
                 </div>
-                {!camper.available && (
+                {camper.status !== 'approved' && (
                   <Badge variant="destructive">Nicht verfügbar</Badge>
                 )}
               </div>
@@ -172,9 +235,9 @@ const CamperDetails = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Star className="h-4 w-4 fill-current text-yellow-500" />
-                <span className="font-medium">{camper.rating}</span>
+                <span className="font-medium">4.5</span>
                 <span className="text-muted-foreground">
-                  ({camper.reviewCount} Bewertungen)
+                  (0 Bewertungen)
                 </span>
               </div>
               
@@ -299,7 +362,7 @@ const CamperDetails = () => {
                 <Button 
                   className="w-full" 
                   disabled={
-                    !camper.available || 
+                    camper.status !== 'approved' || 
                     !startDate || 
                     !endDate || 
                     availabilityStatus !== 'available'
@@ -325,20 +388,24 @@ const CamperDetails = () => {
           <div>
             <h2 className="text-2xl font-bold mb-4">{camper.name}</h2>
             <p className="text-lg text-muted-foreground mb-2">
-              {camper.brand} {camper.model} ({camper.year})
+              Wohnmobil in {camper.location}
             </p>
-            <p className="text-foreground">{camper.description}</p>
+            <p className="text-foreground">{camper.description || "Keine Beschreibung verfügbar."}</p>
           </div>
 
           <div>
             <h3 className="text-xl font-semibold mb-4">Ausstattung & Features</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {camper.features.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-primary rounded-full" />
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
+              {camper.features && camper.features.length > 0 ? (
+                camper.features.map((feature, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                    <span className="text-sm">{feature}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground">Keine Features angegeben.</p>
+              )}
             </div>
           </div>
         </div>
@@ -353,7 +420,7 @@ const CamperDetails = () => {
                   <Ruler className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Länge</p>
-                    <p className="font-medium">{camper.specifications.length}m</p>
+                    <p className="font-medium">6.5m</p>
                   </div>
                 </div>
                 
@@ -361,7 +428,7 @@ const CamperDetails = () => {
                   <Users className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Schlafplätze</p>
-                    <p className="font-medium">{camper.specifications.sleeps}</p>
+                    <p className="font-medium">{camper.capacity}</p>
                   </div>
                 </div>
                 
@@ -369,7 +436,7 @@ const CamperDetails = () => {
                   <Fuel className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Kraftstoff</p>
-                    <p className="font-medium">{camper.specifications.fuel}</p>
+                    <p className="font-medium">Diesel</p>
                   </div>
                 </div>
                 
@@ -377,7 +444,7 @@ const CamperDetails = () => {
                   <Settings className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Getriebe</p>
-                    <p className="font-medium">{camper.specifications.transmission}</p>
+                    <p className="font-medium">Manuell</p>
                   </div>
                 </div>
               </div>
@@ -386,12 +453,12 @@ const CamperDetails = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Breite:</span>
-                  <span className="text-sm font-medium">{camper.specifications.width}m</span>
+                  <span className="text-sm text-muted-foreground">Standort:</span>
+                  <span className="text-sm font-medium">{camper.location}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Höhe:</span>
-                  <span className="text-sm font-medium">{camper.specifications.height}m</span>
+                  <span className="text-sm text-muted-foreground">Preis pro Tag:</span>
+                  <span className="text-sm font-medium">{camper.price_per_day}€</span>
                 </div>
               </div>
             </CardContent>
