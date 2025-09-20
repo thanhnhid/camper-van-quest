@@ -1,5 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { CamperManagement } from "@/components/CamperManagement";
+import { BookingManagement } from "@/components/BookingManagement";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ProviderDashboard() {
   const { profile } = useAuth();
@@ -22,7 +24,18 @@ export default function ProviderDashboard() {
         </div>
 
         {/* Main Content */}
-        <CamperManagement />
+        <Tabs defaultValue="campers" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="campers">Meine Fahrzeuge</TabsTrigger>
+            <TabsTrigger value="bookings">Buchungsanfragen</TabsTrigger>
+          </TabsList>
+          <TabsContent value="campers" className="mt-6">
+            <CamperManagement />
+          </TabsContent>
+          <TabsContent value="bookings" className="mt-6">
+            <BookingManagement />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
