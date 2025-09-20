@@ -60,36 +60,47 @@ export function BookingManagement() {
 
       const camperIds = campers.map(c => c.id);
 
-      // Then get bookings for those campers with related data
+      // Get bookings for those campers
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
           *,
-          campers!inner(name, images),
-          profiles!bookings_customer_id_fkey(first_name, last_name, email)
+          campers!inner(name, images)
         `)
         .in('camper_id', camperIds)
         .order('created_at', { ascending: false });
 
       if (bookingsError) throw bookingsError;
 
-      const formattedBookings = bookingsData?.map(booking => ({
+      // Get customer profiles separately to avoid foreign key issues
+      const customerIds = bookingsData?.map(b => b.customer_id).filter(Boolean) || [];
+      const { data: customers } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .in('id', customerIds);
+
+      const customerMap = customers?.reduce((acc, customer) => {
+        acc[customer.id] = customer;
+        return acc;
+      }, {} as Record<string, any>) || {};
+
+      const formattedBookings: Booking[] = bookingsData?.map(booking => ({
         id: booking.id,
         camper_id: booking.camper_id,
         customer_id: booking.customer_id,
         start_date: booking.start_date,
         end_date: booking.end_date,
         total_price: booking.total_price,
-        status: booking.status,
+        status: booking.status as 'pending' | 'confirmed' | 'rejected',
         created_at: booking.created_at,
         camper: {
           name: booking.campers.name,
-          images: booking.campers.images
+          images: booking.campers.images || []
         },
         customer: {
-          first_name: booking.profiles?.first_name || '',
-          last_name: booking.profiles?.last_name || '',
-          email: booking.profiles?.email || ''
+          first_name: customerMap[booking.customer_id]?.first_name || '',
+          last_name: customerMap[booking.customer_id]?.last_name || '',
+          email: customerMap[booking.customer_id]?.email || ''
         }
       })) || [];
 
