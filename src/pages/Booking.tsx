@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Shield, Sparkles } from "lucide-react";
 import { mockCampers, insuranceOptions } from "@/data/campers";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Booking = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const camper = mockCampers.find(c => c.id === id);
+  const navigate = useNavigate();
+  const { profile } = useAuth();
+  const [camper, setCamper] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
   
   const [bookingData, setBookingData] = useState({
     startDate: "",
@@ -25,6 +31,12 @@ const Booking = () => {
     finalCleaning: false,
     deposit: true
   });
+
+  useEffect(() => {
+    if (id) {
+      fetchCamper();
+    }
+  }, [id]);
 
   // Load dates from URL parameters when component mounts
   useEffect(() => {
@@ -40,12 +52,46 @@ const Booking = () => {
     }
   }, [searchParams]);
 
+  const fetchCamper = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('campers')
+        .select('*')
+        .eq('id', id)
+        .eq('status', 'approved')
+        .single();
+
+      if (error) throw error;
+      setCamper(data);
+    } catch (error) {
+      console.error('Error fetching camper:', error);
+      toast({
+        title: "Fehler",
+        description: "Wohnmobil konnte nicht geladen werden",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Lade Wohnmobil...</div>
+      </div>
+    );
+  }
+
   if (!camper) {
     return (
       <div className="container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Wohnmobil nicht gefunden</h1>
-          <Link to="/">
+          <Link to="/campers">
             <Button className="mt-4">Zurück zur Übersicht</Button>
           </Link>
         </div>
@@ -64,7 +110,7 @@ const Booking = () => {
   const selectedInsurance = insuranceOptions.find(ins => ins.id === bookingData.insurance);
   
   const costs = {
-    camper: days * camper.price,
+    camper: days * (camper?.price_per_day || 0),
     insurance: days * (selectedInsurance?.price || 0),
     finalCleaning: bookingData.finalCleaning ? 75 : 0,
     deposit: 500
@@ -72,7 +118,7 @@ const Booking = () => {
   
   const totalCost = costs.camper + costs.insurance + costs.finalCleaning;
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!bookingData.startDate || !bookingData.endDate) {
       toast({
         title: "Fehler",
@@ -81,11 +127,73 @@ const Booking = () => {
       });
       return;
     }
+
+    if (!profile) {
+      toast({
+        title: "Fehler",
+        description: "Sie müssen angemeldet sein, um eine Buchung zu erstellen.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setBookingLoading(true);
     
-    toast({
-      title: "Buchung erfolgreich!",
-      description: `Ihre Buchung für ${camper.name} wurde erfolgreich abgeschickt.`
-    });
+    try {
+      // Check availability one more time before booking
+      const { data: conflictingBookings, error: checkError } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('camper_id', camper.id)
+        .in('status', ['confirmed', 'pending'])
+        .gte('end_date', bookingData.startDate)
+        .lte('start_date', bookingData.endDate);
+
+      if (checkError) throw checkError;
+
+      if (conflictingBookings && conflictingBookings.length > 0) {
+        toast({
+          title: "Fehler",
+          description: "Der Camper ist für den gewählten Zeitraum bereits gebucht.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Create the booking
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          camper_id: camper.id,
+          customer_id: profile.id,
+          start_date: bookingData.startDate,
+          end_date: bookingData.endDate,
+          total_price: totalCost,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      toast({
+        title: "Buchung erfolgreich!",
+        description: `Ihre Buchung für ${camper.name} wurde erfolgreich erstellt und wartet auf Bestätigung.`,
+      });
+
+      // Navigate to a success page or back to campers
+      navigate('/campers');
+      
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      toast({
+        title: "Fehler",
+        description: "Es gab einen Fehler beim Erstellen der Buchung. Bitte versuchen Sie es erneut.",
+        variant: "destructive"
+      });
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   return (
@@ -93,7 +201,7 @@ const Booking = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Buchung für {camper.name}</h1>
         <p className="text-muted-foreground">
-          {camper.brand} {camper.model} ({camper.year}) - {camper.location}
+          {camper.location} - {camper.price_per_day}€ pro Tag
         </p>
       </div>
 
@@ -255,8 +363,19 @@ const Booking = () => {
                 </p>
               </div>
               
-              <Button onClick={handleBooking} className="w-full" disabled={days === 0}>
-                {days === 0 ? "Datum wählen" : "Kostenpflichtig buchen"}
+              <Button 
+                onClick={handleBooking} 
+                className="w-full" 
+                disabled={days === 0 || bookingLoading || !profile}
+              >
+                {bookingLoading 
+                  ? "Buchung wird erstellt..." 
+                  : days === 0 
+                  ? "Datum wählen" 
+                  : !profile 
+                  ? "Anmeldung erforderlich"
+                  : "Kostenpflichtig buchen"
+                }
               </Button>
               
               <p className="text-xs text-center text-muted-foreground">
