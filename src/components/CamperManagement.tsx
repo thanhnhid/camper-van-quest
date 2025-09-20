@@ -55,9 +55,20 @@ export function CamperManagement() {
         fetchCampers();
       }
     };
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden && profile) {
+        fetchCampers();
+      }
+    };
 
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [profile]);
 
   const fetchCampers = async () => {
@@ -238,8 +249,19 @@ export function CamperManagement() {
 
       <CamperUploadForm
         open={showUploadForm}
-        onOpenChange={setShowUploadForm}
-        onSuccess={fetchCampers}
+        onOpenChange={(open) => {
+          setShowUploadForm(open);
+          if (!open) {
+            setEditingCamper(null);
+            // Force refresh when dialog closes
+            fetchCampers();
+          }
+        }}
+        onSuccess={() => {
+          fetchCampers();
+          setShowUploadForm(false);
+          setEditingCamper(null);
+        }}
         editingCamper={editingCamper}
       />
     </div>

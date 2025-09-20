@@ -48,9 +48,19 @@ const Campers = () => {
     
     // Refresh campers when window gets focus (e.g., returning from another tab)
     const handleFocus = () => fetchCampers();
-    window.addEventListener('focus', handleFocus);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchCampers();
+      }
+    };
     
-    return () => window.removeEventListener('focus', handleFocus);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const fetchCampers = async () => {
