@@ -177,7 +177,7 @@ export function BookingManagement() {
           <CardContent className="p-8 text-center">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 mb-2">
-              Noch keine Buchungsanfragen erhalten.
+              Noch keine wartenden Buchungsanfragen.
             </p>
             <p className="text-sm text-gray-400">
               Sobald Kunden Ihre Camper buchen möchten, erscheinen die Anfragen hier.
@@ -186,7 +186,7 @@ export function BookingManagement() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {bookings.map((booking) => (
+          {bookings.filter(booking => booking.status === 'pending').map((booking) => (
             <Card key={booking.id} className="overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">

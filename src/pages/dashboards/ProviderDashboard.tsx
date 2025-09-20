@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { CamperManagement } from "@/components/CamperManagement";
 import { BookingManagement } from "@/components/BookingManagement";
+import { ApprovedBookings } from "@/components/ApprovedBookings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ProviderDashboard() {
@@ -25,15 +26,19 @@ export default function ProviderDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="campers" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="campers">Meine Fahrzeuge</TabsTrigger>
-            <TabsTrigger value="bookings">Buchungsanfragen</TabsTrigger>
+            <TabsTrigger value="requests">Buchungsanfragen</TabsTrigger>
+            <TabsTrigger value="approved">Bestätigte Buchungen</TabsTrigger>
           </TabsList>
           <TabsContent value="campers" className="mt-6">
             <CamperManagement />
           </TabsContent>
-          <TabsContent value="bookings" className="mt-6">
+          <TabsContent value="requests" className="mt-6">
             <BookingManagement />
+          </TabsContent>
+          <TabsContent value="approved" className="mt-6">
+            <ApprovedBookings />
           </TabsContent>
         </Tabs>
       </div>
