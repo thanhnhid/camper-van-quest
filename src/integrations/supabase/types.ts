@@ -159,6 +159,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          booking_id: string
+          camper_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          rating: number
+          review: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          camper_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          rating: number
+          review?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          camper_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

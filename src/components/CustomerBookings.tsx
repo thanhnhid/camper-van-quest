@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Calendar, Check, X, Eye, Clock, MapPin, Euro, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar, Check, X, Eye, Clock, MapPin, Euro, Trash2, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { format, differenceInDays } from "date-fns";
+import { ReviewForm } from "./ReviewForm";
 
 interface CustomerBooking {
   id: string;
@@ -30,12 +32,15 @@ interface CustomerBooking {
     email: string;
     phone?: string;
   };
+  hasReview?: boolean;
 }
 
 export function CustomerBookings() {
   const { profile } = useAuth();
   const [bookings, setBookings] = useState<CustomerBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<CustomerBooking | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -106,6 +111,15 @@ export function CustomerBookings() {
         return acc;
       }, {} as Record<string, any>) || {};
 
+      // Get existing reviews for these bookings
+      const bookingIds = bookingsData?.map(b => b.id) || [];
+      const { data: existingReviews } = await supabase
+        .from('reviews')
+        .select('booking_id')
+        .in('booking_id', bookingIds);
+
+      const reviewedBookingIds = new Set(existingReviews?.map(r => r.booking_id) || []);
+
       const formattedBookings: CustomerBooking[] = bookingsData?.map(booking => ({
         id: booking.id,
         camper_id: booking.camper_id,
@@ -126,7 +140,8 @@ export function CustomerBookings() {
           last_name: providerMap[booking.campers.provider_id]?.last_name || '',
           email: providerMap[booking.campers.provider_id]?.email || '',
           phone: providerMap[booking.campers.provider_id]?.phone || ''
-        }
+        },
+        hasReview: reviewedBookingIds.has(booking.id)
       })) || [];
 
       setBookings(formattedBookings);
@@ -194,6 +209,18 @@ export function CustomerBookings() {
 
   const canCancel = (booking: CustomerBooking) => {
     return booking.status === 'pending' || (booking.status === 'confirmed' && isUpcoming(booking.start_date));
+  };
+
+  const canReview = (booking: CustomerBooking) => {
+    return booking.status === 'confirmed' && 
+           new Date(booking.end_date) < new Date() && 
+           !booking.hasReview;
+  };
+
+  const handleReviewSubmitted = () => {
+    setReviewDialogOpen(false);
+    setSelectedBooking(null);
+    fetchBookings(); // Refresh to update hasReview status
   };
 
   if (loading) {
@@ -329,35 +356,69 @@ export function CustomerBookings() {
                         <span className="ml-4">Tagespreis: {booking.camper.price_per_day}€</span>
                       </div>
                       
-                      {canCancel(booking) && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Stornieren
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Buchung stornieren</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Möchten Sie die Buchung für "{booking.camper.name}" wirklich stornieren?
-                                <br /><br />
-                                Diese Aktion kann nicht rückgängig gemacht werden.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => cancelBooking(booking.id)}
-                                className="bg-red-600 hover:bg-red-700"
+                      <div className="flex space-x-2">
+                        {canReview(booking) && (
+                          <Dialog open={reviewDialogOpen && selectedBooking?.id === booking.id} onOpenChange={(open) => {
+                            setReviewDialogOpen(open);
+                            if (!open) setSelectedBooking(null);
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                                onClick={() => setSelectedBooking(booking)}
                               >
+                                <Star className="h-4 w-4 mr-1" />
+                                Bewerten
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Camper bewerten</DialogTitle>
+                              </DialogHeader>
+                              {selectedBooking && (
+                                <ReviewForm
+                                  bookingId={selectedBooking.id}
+                                  camperId={selectedBooking.camper_id}
+                                  camperName={selectedBooking.camper.name}
+                                  onReviewSubmitted={handleReviewSubmitted}
+                                />
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        
+                        {canCancel(booking) && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                                <Trash2 className="h-4 w-4 mr-1" />
                                 Stornieren
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Buchung stornieren</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Möchten Sie die Buchung für "{booking.camper.name}" wirklich stornieren?
+                                  <br /><br />
+                                  Diese Aktion kann nicht rückgängig gemacht werden.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => cancelBooking(booking.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Stornieren
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

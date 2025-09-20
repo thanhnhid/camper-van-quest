@@ -272,29 +272,7 @@ const Campers = () => {
               {filteredCampers.map((camper) => (
                 <CamperCard 
                   key={camper.id} 
-                  camper={{
-                    id: camper.id,
-                    name: camper.name,
-                    description: camper.description || "",
-                    brand: "Unbekannt",
-                    model: "",
-                    year: new Date().getFullYear(),
-                    price: camper.price_per_day,
-                    location: camper.location,
-                    images: camper.images.length > 0 ? camper.images : ["/placeholder.svg"],
-                    rating: 4.5,
-                    reviewCount: 0,
-                    available: true,
-                    features: camper.features,
-                    specifications: {
-                      sleeps: camper.capacity,
-                      length: 6.5,
-                      width: 2.3,
-                      height: 2.8,
-                      fuel: "Diesel",
-                      transmission: "Manuell"
-                    }
-                  }} 
+                  camper={camper}
                 />
               ))}
             </div>

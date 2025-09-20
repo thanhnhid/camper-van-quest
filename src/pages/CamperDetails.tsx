@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, differenceInDays, isSameDay, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { ReviewsList } from "@/components/ReviewsList";
 
 interface Camper {
   id: string;
@@ -37,6 +38,8 @@ const CamperDetails = () => {
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState<'available' | 'unavailable' | null>(null);
   const [blockedDates, setBlockedDates] = useState<Date[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(0);
+  const [reviewCount, setReviewCount] = useState<number>(0);
 
   useEffect(() => {
     if (id) {
@@ -47,6 +50,7 @@ const CamperDetails = () => {
   useEffect(() => {
     if (camper?.id) {
       fetchBlockedDates();
+      fetchReviewStats();
     }
   }, [camper?.id]);
 
@@ -104,6 +108,33 @@ const CamperDetails = () => {
       setBlockedDates(blocked);
     } catch (error) {
       console.error('Error fetching blocked dates:', error);
+    }
+  };
+
+  const fetchReviewStats = async () => {
+    if (!camper?.id) return;
+
+    try {
+      const { data: reviews, error } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('camper_id', camper.id);
+
+      if (error) {
+        console.error('Error fetching review stats:', error);
+        return;
+      }
+
+      if (reviews && reviews.length > 0) {
+        const avg = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+        setAverageRating(Math.round(avg * 10) / 10);
+        setReviewCount(reviews.length);
+      } else {
+        setAverageRating(0);
+        setReviewCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching review stats:', error);
     }
   };
 
@@ -233,13 +264,21 @@ const CamperDetails = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Star className="h-4 w-4 fill-current text-yellow-500" />
-                <span className="font-medium">4.5</span>
-                <span className="text-muted-foreground">
-                  (0 Bewertungen)
-                </span>
-              </div>
+              {reviewCount > 0 ? (
+                <div className="flex items-center space-x-2">
+                  <Star className="h-4 w-4 fill-current text-yellow-500" />
+                  <span className="font-medium">{averageRating}</span>
+                  <span className="text-muted-foreground">
+                    ({reviewCount} Bewertung{reviewCount !== 1 ? 'en' : ''})
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <span className="text-muted-foreground text-sm">
+                    Noch keine Bewertungen
+                  </span>
+                </div>
+              )}
               
               <Separator />
               
@@ -465,6 +504,13 @@ const CamperDetails = () => {
           </Card>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      {camper && (
+        <div className="mt-12">
+          <ReviewsList camperId={camper.id} />
+        </div>
+      )}
     </div>
   );
 };
