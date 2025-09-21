@@ -67,8 +67,8 @@ const availableFeatures = [
   "Markise", "Fahrräder", "Sat-Anlage", "Solar", "Generator", "Kühlschrank", "Gefrierfach"
 ];
 
-const gasTypes = [
-  "Propan", "Butan", "Propan/Butan Mix", "Kein Gas"
+const fuelTypes = [
+  "Diesel", "Benzin", "Elektro", "Hybrid"
 ];
 
 const additionalOffers = [
@@ -662,15 +662,15 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
             name="gas_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gasart</FormLabel>
+                <FormLabel>Kraftstoffart</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Gasart auswählen" />
+                      <SelectValue placeholder="Kraftstoffart auswählen" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-background border shadow-lg z-50">
-                    {gasTypes.map((type) => (
+                    {fuelTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
                       </SelectItem>
