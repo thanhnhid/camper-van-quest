@@ -78,6 +78,20 @@ export function CustomerBookings() {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `customer_id=eq.${profile.id}`
+        },
+        (payload) => {
+          console.log('Booking deleted:', payload);
+          // Refresh bookings when a booking is deleted
+          fetchBookings();
+        }
+      )
       .subscribe();
 
     return () => {
