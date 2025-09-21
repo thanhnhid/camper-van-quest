@@ -57,17 +57,12 @@ export default function CancelBooking() {
             location,
             cancellation_fee,
             images,
-            provider_id,
-            profiles!campers_provider_id_fkey (
-              email,
-              first_name,
-              last_name
-            )
+            provider_id
           )
         `)
         .eq('id', bookingId)
         .eq('customer_id', profile?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -84,9 +79,9 @@ export default function CancelBooking() {
             images: bookingData.campers.images || []
           },
           provider: {
-            email: bookingData.campers.profiles.email,
-            first_name: bookingData.campers.profiles.first_name,
-            last_name: bookingData.campers.profiles.last_name
+            email: '',
+            first_name: '',
+            last_name: ''
           }
         });
       }
@@ -108,19 +103,21 @@ export default function CancelBooking() {
     setCancelling(true);
     
     try {
-      // Send notification to provider
-      await supabase.functions.invoke('send-cancellation-notification', {
-        body: {
-          providerEmail: booking.provider.email,
-          providerName: `${booking.provider.first_name} ${booking.provider.last_name}`,
-          customerName: `${profile?.first_name} ${profile?.last_name}`,
-          camperName: booking.camper.name,
-          startDate: booking.start_date,
-          endDate: booking.end_date,
-          reason: reason,
-          cancellationFee: booking.camper.cancellation_fee
-        }
-      });
+      // Send notification to provider if email is available
+      if (booking.provider.email) {
+        await supabase.functions.invoke('send-cancellation-notification', {
+          body: {
+            providerEmail: booking.provider.email,
+            providerName: `${booking.provider.first_name} ${booking.provider.last_name}`.trim(),
+            customerName: `${profile?.first_name} ${profile?.last_name}`,
+            camperName: booking.camper.name,
+            startDate: booking.start_date,
+            endDate: booking.end_date,
+            reason: reason,
+            cancellationFee: booking.camper.cancellation_fee
+          }
+        });
+      }
 
       // Delete the booking
       const { error } = await supabase

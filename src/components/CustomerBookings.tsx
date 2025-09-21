@@ -111,6 +111,7 @@ export function CustomerBookings() {
           campers!inner(name, images, location, price_per_day, provider_id)
         `)
         .eq('customer_id', profile.id)
+        .neq('status', 'cancelled')
         .order('created_at', { ascending: false });
 
       if (bookingsError) throw bookingsError;
