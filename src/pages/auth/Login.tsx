@@ -30,11 +30,18 @@ const Login = () => {
 
   const redirectUserByRole = async (userId: string) => {
     try {
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching user role:', error);
+        // Default redirect if profile fetch fails
+        navigate('/dashboard/customer');
+        return;
+      }
       
       if (profile) {
         switch (profile.role) {
@@ -48,11 +55,16 @@ const Login = () => {
             navigate('/dashboard/admin');
             break;
           default:
-            navigate('/');
+            navigate('/dashboard/customer');
         }
+      } else {
+        // If no profile found, default to customer dashboard
+        navigate('/dashboard/customer');
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
+      // Default redirect if there's an exception
+      navigate('/dashboard/customer');
     }
   };
 
