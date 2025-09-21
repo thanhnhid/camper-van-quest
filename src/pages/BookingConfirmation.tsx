@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Calendar, MapPin, Euro, Shield, CheckCircle, ArrowLeft, AlertCircle } from "lucide-react";
+import { User, Calendar, MapPin, Euro, CheckCircle, ArrowLeft, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +24,21 @@ const BookingConfirmation = () => {
   const [camper, setCamper] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
+  
+  // Customer form data
+  const [customerData, setCustomerData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    zipCode: '',
+    country: 'Deutschland'
+  });
+
+  // Form validation
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   // Get booking details from URL parameters
   const startDate = searchParams.get('start') || '';
@@ -48,6 +65,20 @@ const BookingConfirmation = () => {
       });
       navigate('/campers');
       return;
+    }
+
+    // Pre-fill customer data if available in profile
+    if (profile) {
+      setCustomerData({
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        city: '',
+        zipCode: '',
+        country: 'Deutschland'
+      });
     }
 
     fetchCamper();
@@ -99,8 +130,60 @@ const BookingConfirmation = () => {
   
   const totalCost = costs.camper + costs.insurance + costs.finalCleaning;
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!customerData.firstName.trim()) {
+      newErrors.firstName = 'Vorname ist erforderlich';
+    }
+    
+    if (!customerData.lastName.trim()) {
+      newErrors.lastName = 'Nachname ist erforderlich';
+    }
+    
+    if (!customerData.email.trim()) {
+      newErrors.email = 'E-Mail ist erforderlich';
+    } else if (!/\S+@\S+\.\S+/.test(customerData.email)) {
+      newErrors.email = 'E-Mail Format ungültig';
+    }
+    
+    if (!customerData.phone.trim()) {
+      newErrors.phone = 'Telefonnummer ist erforderlich';
+    }
+    
+    if (!customerData.address.trim()) {
+      newErrors.address = 'Adresse ist erforderlich';
+    }
+
+    if (!customerData.city.trim()) {
+      newErrors.city = 'Stadt ist erforderlich';
+    }
+
+    if (!customerData.zipCode.trim()) {
+      newErrors.zipCode = 'Postleitzahl ist erforderlich';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setCustomerData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
   const handleConfirmBooking = async () => {
-    if (!profile) return;
+    if (!profile || !validateForm()) {
+      toast({
+        title: "Fehler",
+        description: "Bitte füllen Sie alle Pflichtfelder korrekt aus.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setBookingLoading(true);
     
@@ -123,6 +206,22 @@ const BookingConfirmation = () => {
           variant: "destructive"
         });
         return;
+      }
+
+      // Update profile with customer data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: customerData.firstName,
+          last_name: customerData.lastName,
+          phone: customerData.phone,
+          address: `${customerData.address}, ${customerData.zipCode} ${customerData.city}, ${customerData.country}`
+        })
+        .eq('id', profile.id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        // Continue with booking even if profile update fails
       }
 
       // Create the booking
@@ -186,54 +285,135 @@ const BookingConfirmation = () => {
         </Button>
         <h1 className="text-3xl font-bold mb-2">Buchung bestätigen</h1>
         <p className="text-muted-foreground">
-          Überprüfen Sie alle Details vor der finalen Buchung
+          Geben Sie Ihre Kontaktdaten ein und bestätigen Sie alle Details vor der finalen Buchung
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Customer Information */}
+        {/* Customer Information Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <User className="h-5 w-5" />
-              <span>Ihre Daten</span>
+              <span>Ihre Kontaktdaten</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Vorname</label>
-                <p className="font-medium">{profile.first_name || 'Nicht angegeben'}</p>
+                <Label htmlFor="firstName">Vorname *</Label>
+                <Input
+                  id="firstName"
+                  value={customerData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  className={errors.firstName ? 'border-red-500' : ''}
+                />
+                {errors.firstName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+                )}
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Nachname</label>
-                <p className="font-medium">{profile.last_name || 'Nicht angegeben'}</p>
+                <Label htmlFor="lastName">Nachname *</Label>
+                <Input
+                  id="lastName"
+                  value={customerData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  className={errors.lastName ? 'border-red-500' : ''}
+                />
+                {errors.lastName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                )}
               </div>
             </div>
             
             <div>
-              <label className="text-sm font-medium text-muted-foreground">E-Mail</label>
-              <p className="font-medium">{profile.email}</p>
+              <Label htmlFor="email">E-Mail-Adresse *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={customerData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className={errors.email ? 'border-red-500' : ''}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
             
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Telefon</label>
-              <p className="font-medium">{profile.phone || 'Nicht angegeben'}</p>
+              <Label htmlFor="phone">Telefonnummer *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={customerData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                className={errors.phone ? 'border-red-500' : ''}
+                placeholder="+49 123 456789"
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              )}
             </div>
             
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Adresse</label>
-              <p className="font-medium">{profile.address || 'Nicht angegeben'}</p>
+              <Label htmlFor="address">Straße und Hausnummer *</Label>
+              <Input
+                id="address"
+                value={customerData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className={errors.address ? 'border-red-500' : ''}
+                placeholder="Musterstraße 123"
+              />
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
             </div>
 
-            {(!profile.first_name || !profile.last_name || !profile.phone || !profile.address) && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Bitte vervollständigen Sie Ihr Profil für eine reibungslose Buchung.
-                </AlertDescription>
-              </Alert>
-            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="zipCode">Postleitzahl *</Label>
+                <Input
+                  id="zipCode"
+                  value={customerData.zipCode}
+                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                  className={errors.zipCode ? 'border-red-500' : ''}
+                  placeholder="12345"
+                />
+                {errors.zipCode && (
+                  <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="city">Stadt *</Label>
+                <Input
+                  id="city"
+                  value={customerData.city}
+                  onChange={(e) => handleInputChange('city', e.target.value)}
+                  className={errors.city ? 'border-red-500' : ''}
+                  placeholder="Berlin"
+                />
+                {errors.city && (
+                  <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="country">Land</Label>
+              <Input
+                id="country"
+                value={customerData.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                placeholder="Deutschland"
+              />
+            </div>
+
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Diese Daten werden an den Vermieter weitergegeben und sind für die Buchungsabwicklung erforderlich.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
 
