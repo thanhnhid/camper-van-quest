@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, Users, MapPin } from "lucide-react";
+import { Star, Users, MapPin, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface DatabaseCamper {
   id: string;
@@ -23,12 +25,86 @@ interface CamperCardProps {
 }
 
 const CamperCard = ({ camper }: CamperCardProps) => {
+  const { profile } = useAuth();
   const [averageRating, setAverageRating] = useState<number>(0);
   const [reviewCount, setReviewCount] = useState<number>(0);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     fetchReviewStats();
-  }, [camper.id]);
+    if (profile) {
+      checkWishlistStatus();
+    }
+  }, [camper.id, profile]);
+
+  const checkWishlistStatus = async () => {
+    if (!profile) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('wishlists')
+        .select('id')
+        .eq('customer_id', profile.id)
+        .eq('camper_id', camper.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking wishlist status:', error);
+        return;
+      }
+
+      setIsInWishlist(!!data);
+    } catch (error) {
+      console.error('Error checking wishlist status:', error);
+    }
+  };
+
+  const toggleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!profile) {
+      toast.error("Bitte melden Sie sich an, um die Wunschliste zu verwenden");
+      return;
+    }
+
+    setWishlistLoading(true);
+    
+    try {
+      if (isInWishlist) {
+        // Remove from wishlist
+        const { error } = await supabase
+          .from('wishlists')
+          .delete()
+          .eq('customer_id', profile.id)
+          .eq('camper_id', camper.id);
+
+        if (error) throw error;
+        
+        setIsInWishlist(false);
+        toast.success("Aus Wunschliste entfernt");
+      } else {
+        // Add to wishlist
+        const { error } = await supabase
+          .from('wishlists')
+          .insert([{
+            customer_id: profile.id,
+            camper_id: camper.id
+          }]);
+
+        if (error) throw error;
+        
+        setIsInWishlist(true);
+        toast.success("Zur Wunschliste hinzugefügt");
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      toast.error("Fehler beim Aktualisieren der Wunschliste");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const fetchReviewStats = async () => {
     try {
@@ -70,6 +146,23 @@ const CamperCard = ({ camper }: CamperCardProps) => {
           <Badge className="absolute top-2 right-2" variant="destructive">
             Nicht verfügbar
           </Badge>
+        )}
+        
+        {/* Wishlist Button */}
+        {profile && profile.role === 'customer' && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`absolute top-2 left-2 p-2 h-auto ${
+              isInWishlist 
+                ? 'text-red-500 hover:text-red-600' 
+                : 'text-white hover:text-red-500'
+            } bg-black/20 hover:bg-black/40`}
+            onClick={toggleWishlist}
+            disabled={wishlistLoading}
+          >
+            <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} />
+          </Button>
         )}
       </div>
       

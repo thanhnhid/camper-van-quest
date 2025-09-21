@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,6 +21,12 @@ const camperSchema = z.object({
   location: z.string().min(1, "Standort ist erforderlich"),
   capacity: z.number().min(1, "Kapazität muss mindestens 1 Person sein"),
   features: z.array(z.string()).optional().default([]),
+  gas_type: z.string().optional(),
+  insurance_included: z.boolean().default(false),
+  security_deposit: z.number().min(0, "Kaution muss 0 oder höher sein").default(0),
+  cleaning_fee: z.number().min(0, "Reinigungsgebühr muss 0 oder höher sein").default(0),
+  cancellation_fee: z.number().min(0, "Stornogebühr muss 0 oder höher sein").default(0),
+  additional_offers: z.array(z.string()).default([]),
 });
 
 type CamperFormData = z.infer<typeof camperSchema>;
@@ -35,10 +42,21 @@ const availableFeatures = [
   "Markise", "Fahrräder", "Sat-Anlage", "Solar", "Generator", "Kühlschrank", "Gefrierfach"
 ];
 
+const gasTypes = [
+  "Propan", "Butan", "Propan/Butan Mix", "Kein Gas"
+];
+
+const additionalOffers = [
+  "Fahrradträger", "Zelt", "Bettwäsche", "Handtücher", "Campingmöbel", 
+  "Grill", "Kühlbox", "Stromkabel", "Wasserschlauch", "Toilettenpapier",
+  "Erste-Hilfe-Set", "Werkzeugkoffer", "Navigationssystem", "Kindersitz"
+];
+
 export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormProps) {
   const { profile } = useAuth();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(editingCamper?.features || []);
+  const [selectedOffers, setSelectedOffers] = useState<string[]>(editingCamper?.additional_offers || []);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<CamperFormData>({
@@ -50,6 +68,12 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       location: editingCamper?.location || "",
       capacity: editingCamper?.capacity || 1,
       features: editingCamper?.features || [],
+      gas_type: editingCamper?.gas_type || "",
+      insurance_included: editingCamper?.insurance_included || false,
+      security_deposit: editingCamper?.security_deposit || 0,
+      cleaning_fee: editingCamper?.cleaning_fee || 0,
+      cancellation_fee: editingCamper?.cancellation_fee || 0,
+      additional_offers: editingCamper?.additional_offers || [],
     },
   });
 
@@ -128,7 +152,13 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
         features: selectedFeatures,
         images: imageUrls,
         provider_id: profile.id,
-        status: 'approved' // Camper wird direkt genehmigt
+        status: 'approved', // Camper wird direkt genehmigt
+        gas_type: data.gas_type,
+        insurance_included: data.insurance_included,
+        security_deposit: data.security_deposit,
+        cleaning_fee: data.cleaning_fee,
+        cancellation_fee: data.cancellation_fee,
+        additional_offers: selectedOffers
       };
 
       console.log('Submitting camper data:', camperData);
@@ -178,6 +208,14 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
       prev.includes(feature) 
         ? prev.filter(f => f !== feature)
         : [...prev, feature]
+    );
+  };
+
+  const handleOfferToggle = (offer: string) => {
+    setSelectedOffers(prev => 
+      prev.includes(offer) 
+        ? prev.filter(o => o !== offer)
+        : [...prev, offer]
     );
   };
 
@@ -272,6 +310,116 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
             )}
           />
 
+          {/* Gas Type */}
+          <FormField
+            control={form.control}
+            name="gas_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gasart</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Gasart auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-background border shadow-lg z-50">
+                    {gasTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Insurance */}
+          <FormField
+            control={form.control}
+            name="insurance_included"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Versicherung inklusive
+                  </FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Versicherung ist im Grundpreis enthalten
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          {/* Costs */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="security_deposit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kaution (€)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cleaning_fee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Endreinigung (€)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cancellation_fee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stornogebühr (€)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div>
             <Label className="text-sm font-medium">Ausstattung</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
@@ -291,6 +439,24 @@ export function CamperForm({ onSuccess, onCancel, editingCamper }: CamperFormPro
             {selectedFeatures.length === 0 && (
               <p className="text-sm text-red-500 mt-1">Mindestens ein Feature ist erforderlich</p>
             )}
+          </div>
+
+          <div>
+            <Label className="text-sm font-medium">Zusätzliche Angebote</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {additionalOffers.map((offer) => (
+                <div key={offer} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={offer}
+                    checked={selectedOffers.includes(offer)}
+                    onCheckedChange={() => handleOfferToggle(offer)}
+                  />
+                  <Label htmlFor={offer} className="text-sm">
+                    {offer}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div>

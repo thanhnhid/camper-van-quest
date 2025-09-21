@@ -60,46 +60,67 @@ export type Database = {
       }
       campers: {
         Row: {
+          additional_offers: string[] | null
+          cancellation_fee: number | null
           capacity: number
+          cleaning_fee: number | null
           created_at: string
           description: string | null
           features: string[] | null
+          gas_type: string | null
           id: string
           images: string[] | null
+          insurance_included: boolean | null
           location: string
           name: string
           price_per_day: number
           provider_id: string
+          security_deposit: number | null
           status: string
           updated_at: string
+          variable_pricing: Json | null
         }
         Insert: {
+          additional_offers?: string[] | null
+          cancellation_fee?: number | null
           capacity: number
+          cleaning_fee?: number | null
           created_at?: string
           description?: string | null
           features?: string[] | null
+          gas_type?: string | null
           id?: string
           images?: string[] | null
+          insurance_included?: boolean | null
           location: string
           name: string
           price_per_day: number
           provider_id: string
+          security_deposit?: number | null
           status?: string
           updated_at?: string
+          variable_pricing?: Json | null
         }
         Update: {
+          additional_offers?: string[] | null
+          cancellation_fee?: number | null
           capacity?: number
+          cleaning_fee?: number | null
           created_at?: string
           description?: string | null
           features?: string[] | null
+          gas_type?: string | null
           id?: string
           images?: string[] | null
+          insurance_included?: boolean | null
           location?: string
           name?: string
           price_per_day?: number
           provider_id?: string
+          security_deposit?: number | null
           status?: string
           updated_at?: string
+          variable_pricing?: Json | null
         }
         Relationships: [
           {
@@ -189,6 +210,27 @@ export type Database = {
           rating?: number
           review?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      wishlists: {
+        Row: {
+          camper_id: string
+          created_at: string
+          customer_id: string
+          id: string
+        }
+        Insert: {
+          camper_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+        }
+        Update: {
+          camper_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
         }
         Relationships: []
       }

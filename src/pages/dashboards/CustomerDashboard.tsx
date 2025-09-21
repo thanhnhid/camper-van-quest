@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { CustomerBookings } from "@/components/CustomerBookings";
 import { Link } from "react-router-dom";
+import Wishlist from "@/components/Wishlist";
 
 interface Booking {
   id: string;
@@ -157,9 +158,10 @@ const CustomerDashboard = () => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Übersicht</TabsTrigger>
           <TabsTrigger value="bookings">Meine Buchungen</TabsTrigger>
+          <TabsTrigger value="wishlist">Wunschliste</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="mt-6 space-y-6">
@@ -332,6 +334,10 @@ const CustomerDashboard = () => {
         
         <TabsContent value="bookings" className="mt-6">
           <CustomerBookings />
+        </TabsContent>
+        
+        <TabsContent value="wishlist" className="mt-6">
+          <Wishlist />
         </TabsContent>
       </Tabs>
     </div>
