@@ -364,17 +364,24 @@ const Booking = () => {
               </div>
               
               <Button 
-                onClick={handleBooking} 
+                onClick={() => {
+                  // Navigate to confirmation page with all booking details
+                  const params = new URLSearchParams({
+                    start: bookingData.startDate,
+                    end: bookingData.endDate,
+                    insurance: bookingData.insurance,
+                    cleaning: bookingData.finalCleaning.toString()
+                  });
+                  navigate(`/booking/${camper.id}/confirm?${params.toString()}`);
+                }}
                 className="w-full" 
-                disabled={days === 0 || bookingLoading || !profile}
+                disabled={days === 0 || !profile}
               >
-                {bookingLoading 
-                  ? "Buchung wird erstellt..." 
-                  : days === 0 
+                {days === 0 
                   ? "Datum wählen" 
                   : !profile 
                   ? "Anmeldung erforderlich"
-                  : "Kostenpflichtig buchen"
+                  : "Zur Buchungsbestätigung"
                 }
               </Button>
               

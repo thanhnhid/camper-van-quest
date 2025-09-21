@@ -11,6 +11,7 @@ import Campers from "./pages/Campers";
 import NotFound from "./pages/NotFound";
 import CamperDetails from "./pages/CamperDetails";
 import Booking from "./pages/Booking";
+import BookingConfirmation from "./pages/BookingConfirmation";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/campers" element={<Campers />} />
               <Route path="/camper/:id" element={<CamperDetails />} />
               <Route path="/booking/:id" element={<Booking />} />
+              <Route path="/booking/:id/confirm" element={<BookingConfirmation />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />

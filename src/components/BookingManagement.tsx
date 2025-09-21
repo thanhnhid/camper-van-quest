@@ -26,6 +26,8 @@ interface Booking {
     first_name: string;
     last_name: string;
     email: string;
+    phone?: string;
+    address?: string;
   };
 }
 
@@ -76,7 +78,7 @@ export function BookingManagement() {
       const customerIds = bookingsData?.map(b => b.customer_id).filter(Boolean) || [];
       const { data: customers } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email')
+        .select('id, first_name, last_name, email, phone, address')
         .in('id', customerIds);
 
       const customerMap = customers?.reduce((acc, customer) => {
@@ -99,8 +101,10 @@ export function BookingManagement() {
         },
         customer: {
           first_name: customerMap[booking.customer_id]?.first_name || '',
-          last_name: customerMap[booking.customer_id]?.last_name || '',
-          email: customerMap[booking.customer_id]?.email || ''
+          last_name: customerMap[booking.customer_id]?.last_name || '',  
+          email: customerMap[booking.customer_id]?.email || '',
+          phone: customerMap[booking.customer_id]?.phone || '',
+          address: customerMap[booking.customer_id]?.address || ''
         }
       })) || [];
 
@@ -240,6 +244,41 @@ export function BookingManagement() {
               </CardHeader>
               
               <CardContent className="space-y-4">
+                {/* Customer Information */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-700 mb-3">Vollständige Kundendaten</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-sm text-blue-600">Name</p>
+                      <p className="font-medium text-blue-800">
+                        {booking.customer.first_name} {booking.customer.last_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-blue-600">E-Mail</p>
+                      <p className="font-medium text-blue-800">{booking.customer.email}</p>
+                    </div>
+                    {booking.customer.phone && (
+                      <div>
+                        <p className="text-sm text-blue-600">Telefon</p>
+                        <p className="font-medium text-blue-800">{booking.customer.phone}</p>
+                      </div>
+                    )}
+                    {booking.customer.address && (
+                      <div>
+                        <p className="text-sm text-blue-600">Adresse</p>
+                        <p className="font-medium text-blue-800">{booking.customer.address}</p>
+                      </div>
+                    )}
+                    {!booking.customer.phone && !booking.customer.address && (
+                      <div className="col-span-2">
+                        <p className="text-sm text-yellow-600 italic">
+                          Kunde hat noch nicht alle Profildaten ausgefüllt
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Anreise:</span>
