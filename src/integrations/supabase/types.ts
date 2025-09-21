@@ -61,64 +61,103 @@ export type Database = {
       campers: {
         Row: {
           additional_offers: string[] | null
+          beds: number | null
           cancellation_fee: number | null
           capacity: number
           cleaning_fee: number | null
           created_at: string
           description: string | null
+          dimensions_height: number | null
+          dimensions_length: number | null
+          dimensions_width: number | null
+          drive_type: string | null
+          drivers_license: string | null
+          emission_class: string | null
+          empty_weight: number | null
+          engine_power: string | null
           features: string[] | null
+          fuel_consumption: string | null
           gas_type: string | null
           id: string
           images: string[] | null
           insurance_included: boolean | null
           location: string
+          max_weight: number | null
           name: string
+          payload: number | null
           price_per_day: number
           provider_id: string
           security_deposit: number | null
           status: string
+          trailer_coupling: boolean | null
           updated_at: string
           variable_pricing: Json | null
         }
         Insert: {
           additional_offers?: string[] | null
+          beds?: number | null
           cancellation_fee?: number | null
           capacity: number
           cleaning_fee?: number | null
           created_at?: string
           description?: string | null
+          dimensions_height?: number | null
+          dimensions_length?: number | null
+          dimensions_width?: number | null
+          drive_type?: string | null
+          drivers_license?: string | null
+          emission_class?: string | null
+          empty_weight?: number | null
+          engine_power?: string | null
           features?: string[] | null
+          fuel_consumption?: string | null
           gas_type?: string | null
           id?: string
           images?: string[] | null
           insurance_included?: boolean | null
           location: string
+          max_weight?: number | null
           name: string
+          payload?: number | null
           price_per_day: number
           provider_id: string
           security_deposit?: number | null
           status?: string
+          trailer_coupling?: boolean | null
           updated_at?: string
           variable_pricing?: Json | null
         }
         Update: {
           additional_offers?: string[] | null
+          beds?: number | null
           cancellation_fee?: number | null
           capacity?: number
           cleaning_fee?: number | null
           created_at?: string
           description?: string | null
+          dimensions_height?: number | null
+          dimensions_length?: number | null
+          dimensions_width?: number | null
+          drive_type?: string | null
+          drivers_license?: string | null
+          emission_class?: string | null
+          empty_weight?: number | null
+          engine_power?: string | null
           features?: string[] | null
+          fuel_consumption?: string | null
           gas_type?: string | null
           id?: string
           images?: string[] | null
           insurance_included?: boolean | null
           location?: string
+          max_weight?: number | null
           name?: string
+          payload?: number | null
           price_per_day?: number
           provider_id?: string
           security_deposit?: number | null
           status?: string
+          trailer_coupling?: boolean | null
           updated_at?: string
           variable_pricing?: Json | null
         }
