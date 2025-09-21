@@ -3,6 +3,8 @@ import { CamperManagement } from "@/components/CamperManagement";
 import { BookingManagement } from "@/components/BookingManagement";
 import { ApprovedBookings } from "@/components/ApprovedBookings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function ProviderDashboard() {
   const { profile } = useAuth();
@@ -21,6 +23,9 @@ export default function ProviderDashboard() {
                 Willkommen zurück, {profile?.first_name || 'Anbieter'}!
               </p>
             </div>
+            <Button variant="outline" asChild>
+              <Link to="/profile/settings">Profil bearbeiten</Link>
+            </Button>
           </div>
         </div>
 

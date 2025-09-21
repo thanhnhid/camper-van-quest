@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import ProviderDashboard from "./pages/dashboards/ProviderDashboard";
 import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
 import AddCamper from "./pages/provider/AddCamper";
+import ProfileSettings from "./pages/ProfileSettings";
 
 const queryClient = new QueryClient();
 
@@ -37,22 +38,23 @@ const App = () => (
             <Header />
             <main className="flex-1">
               <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/campers" element={<Campers />} />
-              <Route path="/camper/:id" element={<CamperDetails />} />
-              <Route path="/booking/:id" element={<Booking />} />
-              <Route path="/booking/:id/confirm" element={<BookingConfirmation />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-               <Route path="/dashboard/admin" element={<AdminDashboard />} />
-               <Route path="/dashboard/provider" element={<ProviderDashboard />} />
-               <Route path="/dashboard/customer" element={<CustomerDashboard />} />
-               <Route path="/provider/add-camper" element={<AddCamper />} />
+               <Route path="/" element={<Index />} />
+               <Route path="/campers" element={<Campers />} />
+               <Route path="/camper/:id" element={<CamperDetails />} />
+               <Route path="/booking/:id" element={<Booking />} />
+               <Route path="/booking/:id/confirm" element={<BookingConfirmation />} />
+               <Route path="/about" element={<About />} />
+               <Route path="/contact" element={<Contact />} />
+               <Route path="/login" element={<Login />} />
+               <Route path="/register" element={<Register />} />
+               <Route path="/forgot-password" element={<ForgotPassword />} />
+               <Route path="/terms" element={<Terms />} />
+               <Route path="/privacy" element={<Privacy />} />
+                <Route path="/dashboard/admin" element={<AdminDashboard />} />
+                <Route path="/dashboard/provider" element={<ProviderDashboard />} />
+                <Route path="/dashboard/customer" element={<CustomerDashboard />} />
+                <Route path="/provider/add-camper" element={<AddCamper />} />
+                <Route path="/profile/settings" element={<ProfileSettings />} />
               {/* Legacy routes for backward compatibility */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/provider" element={<ProviderDashboard />} />

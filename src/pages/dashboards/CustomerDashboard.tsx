@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { CustomerBookings } from "@/components/CustomerBookings";
+import { Link } from "react-router-dom";
 
 interface Booking {
   id: string;
@@ -227,9 +228,11 @@ const CustomerDashboard = () => {
                   <Search className="mr-2 h-4 w-4" />
                   Wohnmobile suchen
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <User className="mr-2 h-4 w-4" />
-                  Profil bearbeiten
+                <Button className="w-full justify-start" variant="outline" asChild>
+                  <Link to="/profile/settings">
+                    <User className="mr-2 h-4 w-4" />
+                    Profil bearbeiten  
+                  </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <MapPin className="mr-2 h-4 w-4" />
@@ -317,9 +320,11 @@ const CustomerDashboard = () => {
                   <p>{userProfile?.address || 'Nicht angegeben'}</p>
                 </div>
               </div>
-              <Button variant="outline">
-                <User className="mr-2 h-4 w-4" />
-                Profil bearbeiten
+              <Button variant="outline" asChild>
+                <Link to="/profile/settings">
+                  <User className="mr-2 h-4 w-4" />
+                  Profil bearbeiten
+                </Link>
               </Button>
             </CardContent>
           </Card>
