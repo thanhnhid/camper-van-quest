@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Check, Eye, MapPin, Users, Clock, Euro } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Calendar, Check, Eye, MapPin, Users, Clock, Euro, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,6 +39,9 @@ export function ApprovedBookings() {
   const { profile } = useAuth();
   const [bookings, setBookings] = useState<ApprovedBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -143,6 +151,57 @@ export function ApprovedBookings() {
       return { text: 'Bevorstehend', color: 'bg-green-100 text-green-800' };
     }
     return { text: 'Abgeschlossen', color: 'bg-gray-100 text-gray-800' };
+  };
+
+  const handleCancelBooking = async (booking: ApprovedBooking) => {
+    if (!cancellationReason.trim()) {
+      toast.error('Bitte geben Sie einen Grund für die Stornierung an');
+      return;
+    }
+
+    setCancellingBooking(booking.id);
+    
+    try {
+      // Update booking status to cancelled
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', booking.id);
+
+      if (updateError) throw updateError;
+
+      // Send cancellation notification to customer
+      const { error: notificationError } = await supabase.functions.invoke('send-customer-cancellation-notification', {
+        body: {
+          customerEmail: booking.customer.email,
+          customerName: `${booking.customer.first_name} ${booking.customer.last_name}`,
+          providerName: `${profile?.first_name} ${profile?.last_name}`,
+          camperName: booking.camper.name,
+          startDate: booking.start_date,
+          endDate: booking.end_date,
+          reason: cancellationReason,
+          cancellationFee: 0 // You can add this field if needed
+        }
+      });
+
+      if (notificationError) {
+        console.error('Error sending notification:', notificationError);
+        toast.error('Buchung wurde storniert, aber die Benachrichtigung konnte nicht gesendet werden');
+      } else {
+        toast.success('Buchung wurde erfolgreich storniert und der Kunde wurde benachrichtigt');
+      }
+
+      // Remove the cancelled booking from the list
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
+      setDialogOpen(false);
+      setCancellationReason("");
+      
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Fehler beim Stornieren der Buchung');
+    } finally {
+      setCancellingBooking(null);
+    }
   };
 
   if (loading) {
@@ -263,6 +322,84 @@ export function ApprovedBookings() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Actions */}
+                  {isUpcoming(booking.start_date) && (
+                    <div className="pt-3 border-t border-gray-100">
+                      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            className="w-full"
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Buchung stornieren
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Buchung stornieren</DialogTitle>
+                            <DialogDescription>
+                              Sie sind dabei, die Buchung für "{booking.camper.name}" zu stornieren. 
+                              Der Kunde wird automatisch benachrichtigt.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="reason">Grund der Stornierung *</Label>
+                              <Textarea
+                                id="reason"
+                                placeholder="Bitte geben Sie den Grund für die Stornierung ein..."
+                                value={cancellationReason}
+                                onChange={(e) => setCancellationReason(e.target.value)}
+                                className="min-h-[80px]"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setDialogOpen(false);
+                                setCancellationReason("");
+                              }}
+                            >
+                              Abbrechen
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="destructive"
+                                  disabled={!cancellationReason.trim() || cancellingBooking === booking.id}
+                                >
+                                  {cancellingBooking === booking.id ? "Storniere..." : "Stornieren"}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Stornierung bestätigen</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Sind Sie sicher, dass Sie diese Buchung stornieren möchten? 
+                                    Diese Aktion kann nicht rückgängig gemacht werden.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleCancelBooking(booking)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Stornieren
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  )}
 
                   {/* Additional Information */}
                   <div className="pt-2 border-t border-gray-100">
