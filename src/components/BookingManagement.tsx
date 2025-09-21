@@ -42,6 +42,55 @@ export function BookingManagement() {
     }
   }, [profile]);
 
+  // Set up real-time subscription for booking changes
+  useEffect(() => {
+    if (!profile) return;
+
+    const channel = supabase
+      .channel('booking-management-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'bookings',
+        },
+        (payload) => {
+          console.log('New booking created:', payload);
+          fetchBookings();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+        },
+        (payload) => {
+          console.log('Booking updated:', payload);
+          fetchBookings();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'bookings',
+        },
+        (payload) => {
+          console.log('Booking deleted:', payload);
+          fetchBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile]);
+
   const fetchBookings = async () => {
     if (!profile) return;
 
@@ -62,7 +111,7 @@ export function BookingManagement() {
 
       const camperIds = campers.map(c => c.id);
 
-      // Get bookings for those campers
+      // Get bookings for those campers (only pending ones)
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -70,6 +119,7 @@ export function BookingManagement() {
           campers!inner(name, images)
         `)
         .in('camper_id', camperIds)
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (bookingsError) throw bookingsError;

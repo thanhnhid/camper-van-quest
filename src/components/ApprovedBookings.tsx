@@ -49,6 +49,45 @@ export function ApprovedBookings() {
     }
   }, [profile]);
 
+  // Set up real-time subscription for booking changes
+  useEffect(() => {
+    if (!profile) return;
+
+    const channel = supabase
+      .channel('approved-booking-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+        },
+        (payload) => {
+          console.log('Booking updated:', payload);
+          // Refresh bookings when status changes
+          fetchApprovedBookings();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'bookings',
+        },
+        (payload) => {
+          console.log('Booking deleted:', payload);
+          // Refresh bookings when a booking is deleted
+          fetchApprovedBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile]);
+
   const fetchApprovedBookings = async () => {
     if (!profile) return;
 
