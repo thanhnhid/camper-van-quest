@@ -236,11 +236,11 @@ const CustomerDashboard = () => {
                     Profil bearbeiten  
                   </Link>
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button className="w-full justify-start" variant="outline" onClick={() => window.location.href = '/my-locations'}>
                   <MapPin className="mr-2 h-4 w-4" />
                   Meine Standorte
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
+                <Button className="w-full justify-start" variant="outline" onClick={() => window.location.href = '/wishlist'}>
                   <Star className="mr-2 h-4 w-4" />
                   Favoriten ansehen
                 </Button>

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { format, differenceInDays } from "date-fns";
 import { ReviewForm } from "./ReviewForm";
+import { useNavigate } from "react-router-dom";
 
 interface CustomerBooking {
   id: string;
@@ -37,6 +38,7 @@ interface CustomerBooking {
 
 export function CustomerBookings() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<CustomerBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -153,22 +155,7 @@ export function CustomerBookings() {
     }
   };
 
-  const cancelBooking = async (bookingId: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId);
-
-      if (error) throw error;
-
-      toast.success('Buchung wurde storniert');
-      fetchBookings(); // Refresh the list
-    } catch (error) {
-      console.error('Error canceling booking:', error);
-      toast.error('Fehler beim Stornieren der Buchung');
-    }
-  };
+  // Removed cancelBooking function - now handled by CancelBooking page
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -409,7 +396,7 @@ export function CustomerBookings() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => cancelBooking(booking.id)}
+                                  onClick={() => navigate(`/cancel-booking/${booking.id}`)}
                                   className="bg-red-600 hover:bg-red-700"
                                 >
                                   Stornieren

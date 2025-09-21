@@ -24,6 +24,9 @@ import ProviderDashboard from "./pages/dashboards/ProviderDashboard";
 import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
 import AddCamper from "./pages/provider/AddCamper";
 import ProfileSettings from "./pages/ProfileSettings";
+import CancelBooking from "./pages/CancelBooking";
+import Wishlist from "./components/Wishlist";
+import MyLocations from "./pages/MyLocations";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +57,10 @@ const App = () => (
                 <Route path="/dashboard/provider" element={<ProviderDashboard />} />
                 <Route path="/dashboard/customer" element={<CustomerDashboard />} />
                 <Route path="/provider/add-camper" element={<AddCamper />} />
-                <Route path="/profile/settings" element={<ProfileSettings />} />
+                 <Route path="/profile/settings" element={<ProfileSettings />} />
+                 <Route path="/cancel-booking/:bookingId" element={<CancelBooking />} />
+                 <Route path="/wishlist" element={<Wishlist />} />
+                 <Route path="/my-locations" element={<MyLocations />} />
               {/* Legacy routes for backward compatibility */}
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/provider" element={<ProviderDashboard />} />
