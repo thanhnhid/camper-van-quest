@@ -162,13 +162,13 @@ export function ApprovedBookings() {
     setCancellingBooking(booking.id);
     
     try {
-      // Update booking status to cancelled
-      const { error: updateError } = await supabase
+      // Delete the booking (same as customer cancellation)
+      const { error: deleteError } = await supabase
         .from('bookings')
-        .update({ status: 'cancelled' })
+        .delete()
         .eq('id', booking.id);
 
-      if (updateError) throw updateError;
+      if (deleteError) throw deleteError;
 
       // Send cancellation notification to customer
       const { error: notificationError } = await supabase.functions.invoke('send-customer-cancellation-notification', {
