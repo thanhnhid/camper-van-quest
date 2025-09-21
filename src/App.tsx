@@ -23,7 +23,7 @@ import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import ProviderDashboard from "./pages/dashboards/ProviderDashboard";
 import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
 import AddCamper from "./pages/provider/AddCamper";
-import ProfileSettings from "./pages/ProfileSettings";
+import ProfileSettings from "@/pages/ProfileSettings";
 import CancelBooking from "./pages/CancelBooking";
 import Wishlist from "./components/Wishlist";
 import MyLocations from "./pages/MyLocations";
