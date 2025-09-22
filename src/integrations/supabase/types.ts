@@ -282,6 +282,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      get_safe_profile_for_booking: {
+        Args: { profile_id: string }
+        Returns: {
+          first_name: string
+          id: string
+          last_name: string
+          role: Database["public"]["Enums"]["user_role"]
+        }[]
+      }
       get_user_role_by_user_id: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
