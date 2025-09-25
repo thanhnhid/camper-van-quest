@@ -3,6 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { MessageCircle, Phone, Mail } from "lucide-react";
 
 const FAQ = () => {
+  console.log("FAQ component loading");
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12">
