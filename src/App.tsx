@@ -19,6 +19,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import ProviderDashboard from "./pages/dashboards/ProviderDashboard";
 import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
@@ -46,9 +47,10 @@ const App = () => (
                <Route path="/camper/:id" element={<CamperDetails />} />
                <Route path="/booking/:id" element={<Booking />} />
                <Route path="/booking/:id/confirm" element={<BookingConfirmation />} />
-               <Route path="/about" element={<About />} />
-               <Route path="/contact" element={<Contact />} />
-               <Route path="/login" element={<Login />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/login" element={<Login />} />
                <Route path="/register" element={<Register />} />
                <Route path="/forgot-password" element={<ForgotPassword />} />
                <Route path="/terms" element={<Terms />} />

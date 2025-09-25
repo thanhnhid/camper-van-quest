@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { MapPin, Phone, Mail, Clock, MessageCircle, HeadphonesIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Contact = () => {
   return (
@@ -178,7 +179,9 @@ const Contact = () => {
                 <p className="text-muted-foreground text-sm mb-4">
                   Antworten auf häufige Fragen
                 </p>
-                <Button variant="outline" size="sm">FAQ besuchen</Button>
+                <Link to="/faq">
+                  <Button variant="outline" size="sm">FAQ besuchen</Button>
+                </Link>
               </CardContent>
             </Card>
 
