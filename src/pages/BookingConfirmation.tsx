@@ -69,15 +69,40 @@ const BookingConfirmation = () => {
 
     // Pre-fill customer data if available in profile
     if (profile) {
+      // Parse existing address if available (format: "street, zipCode city, country")
+      let parsedAddress = '';
+      let parsedZipCode = '';
+      let parsedCity = '';
+      let parsedCountry = 'Deutschland';
+
+      if (profile.address) {
+        const addressParts = profile.address.split(', ');
+        if (addressParts.length >= 3) {
+          parsedAddress = addressParts[0]; // street and house number
+          const zipCityPart = addressParts[1]; // zipCode city
+          parsedCountry = addressParts[2] || 'Deutschland'; // country
+          
+          // Extract zip code and city from "zipCode city" format
+          const zipCityMatch = zipCityPart.match(/^(\d+)\s+(.+)$/);
+          if (zipCityMatch) {
+            parsedZipCode = zipCityMatch[1];
+            parsedCity = zipCityMatch[2];
+          }
+        } else {
+          // If format doesn't match, put everything in address field
+          parsedAddress = profile.address;
+        }
+      }
+
       setCustomerData({
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
         email: profile.email || '',
         phone: profile.phone || '',
-        address: profile.address || '',
-        city: '',
-        zipCode: '',
-        country: 'Deutschland'
+        address: parsedAddress,
+        city: parsedCity,
+        zipCode: parsedZipCode,
+        country: parsedCountry
       });
     }
 
